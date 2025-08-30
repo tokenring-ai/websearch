@@ -1,4 +1,4 @@
-export interface WebSearchOptions {
+export interface WebSearchProviderOptions {
   countryCode?: string;
   language?: string;
   location?: string;
@@ -22,8 +22,8 @@ export interface WebPageResult {
 
 }
 
-export default abstract class WebSearchResource {
-  abstract searchWeb(query: string, options?: WebSearchOptions): Promise<WebSearchResult>;
-  abstract searchNews(query: string, options?: WebSearchOptions): Promise<WebSearchResult>;
+export default abstract class WebSearchProvider {
+  abstract searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>;
+  abstract searchNews(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>;
   abstract fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>;
 }
