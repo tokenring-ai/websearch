@@ -1,14 +1,17 @@
-# @token-ring/websearch
+# @tokenring-ai/websearch
 
-Abstract web search service interface for the Token Ring ecosystem. This package provides a unified interface for web search operations that can be implemented by different providers (ScraperAPI, Serper, etc.).
+Abstract web search service interface for the Token Ring ecosystem. This package provides a unified interface for web
+search operations that can be implemented by different providers (ScraperAPI, Serper, etc.).
 
 ## Core Components
 
 ### WebSearchResource (Abstract Base Class)
 
-The abstract `WebSearchResource` class defines a standardized interface for web search operations. Concrete implementations should extend this class.
+The abstract `WebSearchResource` class defines a standardized interface for web search operations. Concrete
+implementations should extend this class.
 
 **Key Methods:**
+
 - `searchWeb(query: string, options?: WebSearchOptions): Promise<WebSearchResult>` - Search the web
 - `searchNews(query: string, options?: WebSearchOptions): Promise<WebSearchResult>` - Search news
 - `fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>` - Fetch a web page
@@ -20,7 +23,7 @@ Manages multiple web search resources and provides a unified interface for web s
 ### Tools
 
 - **`searchWeb`** - Search the web using the active provider
-- **`searchNews`** - Search news using the active provider  
+- **`searchNews`** - Search news using the active provider
 - **`fetchPage`** - Fetch a web page using the active provider
 
 ### Chat Command
@@ -29,7 +32,8 @@ Manages multiple web search resources and provides a unified interface for web s
 
 ## Usage
 
-Concrete implementations (e.g., ScraperAPI, Serper) should extend `WebSearchResource` and implement the abstract methods. The service automatically manages provider selection and delegation.
+Concrete implementations (e.g., ScraperAPI, Serper) should extend `WebSearchResource` and implement the abstract
+methods. The service automatically manages provider selection and delegation.
 
 ## Examples
 

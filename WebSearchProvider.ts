@@ -24,6 +24,8 @@ export interface WebPageResult {
 
 export default abstract class WebSearchProvider {
   abstract searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>;
+
   abstract searchNews(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>;
+
   abstract fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>;
 }

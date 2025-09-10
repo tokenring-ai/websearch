@@ -1,6 +1,4 @@
-import {HumanInterfaceService} from "@token-ring/chat";
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import WebSearchService from "../WebSearchService.js";
 
 export const description = "/websearch [action] - Web search operations";
@@ -50,14 +48,13 @@ function parseArgs(args: string[]): { flags: Record<string, string | number | bo
   return {flags, rest};
 }
 
-export async function execute(remainder: string, registry: Registry): Promise<void> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  registry.requireFirstServiceByType(HumanInterfaceService);
-  const webSearch = registry.requireFirstServiceByType(WebSearchService);
+export async function execute(remainder: string, agent: Agent): Promise<void> {
+  const chat = agent.requireFirstServiceByType(Agent);
+  const webSearch = agent.requireFirstServiceByType(WebSearchService);
 
   const [sub, ...rest] = remainder.trim().split(/\s+/);
   if (!sub) {
-    help().forEach((l) => chat.systemLine(l));
+    help().forEach((l) => chat.infoLine(l));
     return;
   }
 
@@ -76,7 +73,7 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       num: flags.num as number,
       page: flags.page as number,
     });
-    chat.systemLine(`Search results: ${JSON.stringify(result.results).slice(0, 500)}...`);
+    chat.infoLine(`Search results: ${JSON.stringify(result.results).slice(0, 500)}...`);
   } else if (sub === "news") {
     if (!query) {
       chat.errorLine("Usage: /websearch news <query> [flags]");
@@ -89,7 +86,7 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       num: flags.num as number,
       page: flags.page as number,
     });
-    chat.systemLine(`News results: ${JSON.stringify(result.results).slice(0, 500)}...`);
+    chat.infoLine(`News results: ${JSON.stringify(result.results).slice(0, 500)}...`);
   } else if (sub === "fetch") {
     if (!query) {
       chat.errorLine("Usage: /websearch fetch <url> [flags]");
@@ -99,13 +96,13 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       render: !!flags.render,
       countryCode: flags.country as string,
     });
-    chat.systemLine(`Fetched ${result.html.length} characters`);
+    chat.infoLine(`Fetched ${result.html.length} characters`);
   } else if (sub === "provider") {
     const active = webSearch.getActiveResource();
     const available = webSearch.getAvailableResources();
-    chat.systemLine(`Active provider: ${active || "none"}`);
-    chat.systemLine(`Available providers: ${available.join(", ")}`);
+    chat.infoLine(`Active provider: ${active || "none"}`);
+    chat.infoLine(`Available providers: ${available.join(", ")}`);
   } else {
-    chat.systemLine("Unknown action. Use: search, news, fetch, provider");
+    chat.infoLine("Unknown action. Use: search, news, fetch, provider");
   }
 }

@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
@@ -21,10 +20,10 @@ export async function execute(
     num?: number;
     page?: number;
   },
-  registry: Registry,
+  agent: Agent,
 ): Promise<{ results?: any }> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  const webSearch = registry.requireFirstServiceByType(WebSearchService);
+  const chat = agent.requireFirstServiceByType(Agent);
+  const webSearch = agent.requireFirstServiceByType(WebSearchService);
 
   if (!query) {
     throw new Error(`[${name}] query is required`);

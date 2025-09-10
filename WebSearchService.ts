@@ -1,13 +1,19 @@
-import {Service, type Registry} from "@token-ring/registry";
-import GenericSingularRegistry from "@token-ring/utility/GenericSingularRegistry";
-import WebSearchProvider, {type WebSearchProviderOptions, type WebSearchResult, type WebPageOptions, type WebPageResult} from "./WebSearchProvider.js";
+import {Agent} from "@tokenring-ai/agent";
+import {TokenRingService} from "@tokenring-ai/agent/types";
+import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/KeyedRegistryWithSingleSelection";
+import WebSearchProvider, {
+  type WebPageOptions,
+  type WebPageResult,
+  type WebSearchProviderOptions,
+  type WebSearchResult
+} from "./WebSearchProvider.js";
 
-export default class WebSearchService extends Service {
+export default class WebSearchService implements TokenRingService {
   name = "WebSearch";
   description = "Abstract interface for web search operations";
-  protected registry!: Registry;
+  protected agent!: Agent;
 
-  private providerRegistry = new GenericSingularRegistry<WebSearchProvider>();
+  private providerRegistry = new KeyedRegistryWithSingleSelection<WebSearchProvider>();
 
   registerResource = this.providerRegistry.register;
   getActiveResource = this.providerRegistry.getActiveItem;
