@@ -1,3 +1,4 @@
+import { parseArgs } from "node:util";
 import Agent from "@tokenring-ai/agent/Agent";
 import WebSearchService from "../WebSearchService.js";
 
@@ -28,24 +29,44 @@ export function help(): Array<string> {
   ];
 }
 
-function parseArgs(args: string[]): { flags: Record<string, string | number | boolean>; rest: string[] } {
-  const flags: Record<string, string | number | boolean> = {};
-  const rest: string[] = [];
-  for (let i = 0; i < args.length; i++) {
-    const a = args[i];
-    if (a === "--country" || a === "--language" || a === "--location") {
-      flags[a.slice(2)] = args[i + 1];
-      i++;
-    } else if (a === "--num" || a === "--page") {
-      flags[a.slice(2)] = Number(args[i + 1]);
-      i++;
-    } else if (a === "--render") {
-      flags["render"] = true;
-    } else if (!a.startsWith("--")) {
-      rest.push(a);
-    }
+interface WebSearchArgs {
+  flags: {
+    country?: string;
+    language?: string;
+    location?: string;
+    num?: number;
+    page?: number;
+    render?: boolean;
   }
-  return {flags, rest};
+  rest: string[];
+}
+
+function parseWebSearchArgs(args: string[]): WebSearchArgs {
+  const { values, positionals } = parseArgs({
+    args,
+    options: {
+      country: { type: 'string' },
+      language: { type: 'string' },
+      location: { type: 'string' },
+      num: { type: 'string' },
+      page: { type: 'string' },
+      render: { type: 'boolean' }
+    },
+    allowPositionals: true,
+    strict: false
+  });
+
+  const flags: WebSearchArgs["flags"] = {};
+  
+  // Convert string numbers to actual numbers for num and page
+  if (values.country) flags.country = values.country as string;
+  if (values.language) flags.language = values.language as string;
+  if (values.location) flags.location = values.location as string;
+  if (values.num) flags.num = Number(values.num);
+  if (values.page) flags.page = Number(values.page);
+  if (values.render) flags.render = values.render as boolean;
+
+  return { flags, rest: positionals };
 }
 
 export async function execute(remainder: string, agent: Agent): Promise<void> {
@@ -58,7 +79,7 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
     return;
   }
 
-  const {flags, rest: queryParts} = parseArgs(rest);
+  const {flags, rest: queryParts} = parseWebSearchArgs(rest);
   const query = queryParts.join(" ");
 
   if (sub === "search") {
@@ -67,9 +88,9 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
       return;
     }
     const result = await webSearch.searchWeb(query, {
-      countryCode: flags.country as string,
-      language: flags.language as string,
-      location: flags.location as string,
+      countryCode: flags.country,
+      language: flags.language,
+      location: flags.location,
       num: flags.num as number,
       page: flags.page as number,
     });
@@ -80,9 +101,9 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
       return;
     }
     const result = await webSearch.searchNews(query, {
-      countryCode: flags.country as string,
-      language: flags.language as string,
-      location: flags.location as string,
+      countryCode: flags.country,
+      language: flags.language,
+      location: flags.location,
       num: flags.num as number,
       page: flags.page as number,
     });
@@ -94,7 +115,7 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
     }
     const result = await webSearch.fetchPage(query, {
       render: !!flags.render,
-      countryCode: flags.country as string,
+      countryCode: flags.country,
     });
     chat.infoLine(`Fetched ${result.html.length} characters`);
   } else if (sub === "provider") {
