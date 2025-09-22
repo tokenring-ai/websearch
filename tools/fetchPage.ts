@@ -16,8 +16,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ html: string }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const webSearch = agent.requireFirstServiceByType(WebSearchService);
+  const chat = agent.requireServiceByType(Agent);
+  const webSearch = agent.requireServiceByType(WebSearchService);
 
   if (!url) {
     throw new Error(`[${name}] url is required`);

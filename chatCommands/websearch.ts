@@ -1,5 +1,5 @@
-import { parseArgs } from "node:util";
 import Agent from "@tokenring-ai/agent/Agent";
+import {parseArgs} from "node:util";
 import WebSearchService from "../WebSearchService.js";
 
 export const description = "/websearch [action] - Web search operations";
@@ -70,8 +70,8 @@ function parseWebSearchArgs(args: string[]): WebSearchArgs {
 }
 
 export async function execute(remainder: string, agent: Agent): Promise<void> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const webSearch = agent.requireFirstServiceByType(WebSearchService);
+  const chat = agent.requireServiceByType(Agent);
+  const webSearch = agent.requireServiceByType(WebSearchService);
 
   const [sub, ...rest] = remainder.trim().split(/\s+/);
   if (!sub) {

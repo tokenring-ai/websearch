@@ -22,8 +22,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ results?: any }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const webSearch = agent.requireFirstServiceByType(WebSearchService);
+  const chat = agent.requireServiceByType(Agent);
+  const webSearch = agent.requireServiceByType(WebSearchService);
 
   if (!query) {
     throw new Error(`[${name}] query is required`);
