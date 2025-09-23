@@ -9,8 +9,8 @@ import WebSearchProvider, {
 } from "./WebSearchProvider.js";
 
 export default class WebSearchService implements TokenRingService {
-  name = "WebSearch";
-  description = "Abstract interface for web search operations";
+  name = "WebSearchService";
+  description = "Service for Web Search";
   protected agent!: Agent;
 
   private providerRegistry = new KeyedRegistryWithSingleSelection<WebSearchProvider>();
