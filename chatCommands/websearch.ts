@@ -11,7 +11,7 @@ export function help(): Array<string> {
     "    search <query>  - Search the web",
     "    news <query>    - Search news",
     "    fetch <url>     - Fetch a web page",
-    "    provider        - Show/set active provider",
+    "    provider [name] - Show/set active provider",
     "",
     "  Options:",
     "    --country <code>   - Country code",
@@ -26,6 +26,7 @@ export function help(): Array<string> {
     "    /websearch news artificial intelligence --num 5",
     "    /websearch fetch https://example.com --render",
     "    /websearch provider",
+    "    /websearch provider tavily",
   ];
 }
 
@@ -70,12 +71,12 @@ function parseWebSearchArgs(args: string[]): WebSearchArgs {
 }
 
 export async function execute(remainder: string, agent: Agent): Promise<void> {
-  const chat = agent.requireServiceByType(Agent);
+  
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   const [sub, ...rest] = remainder.trim().split(/\s+/);
   if (!sub) {
-    help().forEach((l) => chat.infoLine(l));
+    help().forEach((l) => agent.infoLine(l));
     return;
   }
 
@@ -84,7 +85,7 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
 
   if (sub === "search") {
     if (!query) {
-      chat.errorLine("Usage: /websearch search <query> [flags]");
+      agent.errorLine("Usage: /websearch search <query> [flags]");
       return;
     }
     const result = await webSearch.searchWeb(query, {
@@ -94,10 +95,10 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
       num: flags.num as number,
       page: flags.page as number,
     });
-    chat.infoLine(`Search results: ${JSON.stringify(result.results).slice(0, 500)}...`);
+    agent.infoLine(`Search results: ${JSON.stringify(result.results).slice(0, 500)}...`);
   } else if (sub === "news") {
     if (!query) {
-      chat.errorLine("Usage: /websearch news <query> [flags]");
+      agent.errorLine("Usage: /websearch news <query> [flags]");
       return;
     }
     const result = await webSearch.searchNews(query, {
@@ -107,23 +108,33 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
       num: flags.num as number,
       page: flags.page as number,
     });
-    chat.infoLine(`News results: ${JSON.stringify(result.results).slice(0, 500)}...`);
+    agent.infoLine(`News results: ${JSON.stringify(result.results).slice(0, 500)}...`);
   } else if (sub === "fetch") {
     if (!query) {
-      chat.errorLine("Usage: /websearch fetch <url> [flags]");
+      agent.errorLine("Usage: /websearch fetch <url> [flags]");
       return;
     }
     const result = await webSearch.fetchPage(query, {
       render: !!flags.render,
       countryCode: flags.country,
     });
-    chat.infoLine(`Fetched ${result.html.length} characters`);
+    agent.infoLine(`Fetched ${result.html.length} characters`);
   } else if (sub === "provider") {
-    const active = webSearch.getActiveResource();
-    const available = webSearch.getAvailableResources();
-    chat.infoLine(`Active provider: ${active || "none"}`);
-    chat.infoLine(`Available providers: ${available.join(", ")}`);
+    if (query) {
+      const available = webSearch.getAvailableProviders();
+      if (available.includes(query)) {
+        webSearch.setActiveProvider(query);
+        agent.infoLine(`Provider set to: ${query}`);
+      } else {
+        agent.errorLine(`Provider '${query}' not available. Available: ${available.join(", ")}`);
+      }
+    } else {
+      const active = webSearch.getActiveProvider();
+      const available = webSearch.getAvailableProviders();
+      agent.infoLine(`Active provider: ${active || "none"}`);
+      agent.infoLine(`Available providers: ${available.join(", ")}`);
+    }
   } else {
-    chat.infoLine("Unknown action. Use: search, news, fetch, provider");
+    agent.infoLine("Unknown action. Use: search, news, fetch, provider");
   }
 }

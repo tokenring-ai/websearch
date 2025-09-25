@@ -22,14 +22,13 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ results?: any }> {
-  const chat = agent.requireServiceByType(Agent);
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   if (!query) {
     throw new Error(`[${name}] query is required`);
   }
 
-  chat.infoLine(`[${name}] Searching: ${query}`);
+  agent.infoLine(`[${name}] Searching: ${query}`);
   const result = await webSearch.searchWeb(query, {
     countryCode,
     language,

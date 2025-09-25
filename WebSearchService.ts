@@ -15,10 +15,10 @@ export default class WebSearchService implements TokenRingService {
 
   private providerRegistry = new KeyedRegistryWithSingleSelection<WebSearchProvider>();
 
-  registerResource = this.providerRegistry.register;
-  getActiveResource = this.providerRegistry.getActiveItem;
-  setActiveResource = this.providerRegistry.setEnabledItem;
-  getAvailableResources = this.providerRegistry.getAllItemNames;
+  registerProvider = this.providerRegistry.register;
+  getActiveProvider = this.providerRegistry.getActiveItem;
+  setActiveProvider = this.providerRegistry.setEnabledItem;
+  getAvailableProviders = this.providerRegistry.getAllItemNames;
 
   async searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult> {
     return this.providerRegistry.getActiveItem().searchWeb(query, options);

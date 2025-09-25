@@ -16,14 +16,14 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ html: string }> {
-  const chat = agent.requireServiceByType(Agent);
+  
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   if (!url) {
     throw new Error(`[${name}] url is required`);
   }
 
-  chat.infoLine(`[${name}] Fetching: ${url}`);
+  agent.infoLine(`[${name}] Fetching: ${url}`);
   const result = await webSearch.fetchPage(url, {
     render,
     countryCode

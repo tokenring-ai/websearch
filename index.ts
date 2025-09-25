@@ -13,4 +13,4 @@ export const packageInfo: TokenRingPackage = {
 };
 
 export {default as WebSearchService} from "./WebSearchService.ts";
-export {default as WebSearchResource} from "./WebSearchProvider.ts";
+export {default as WebSearchProvider} from "./WebSearchProvider.ts";
