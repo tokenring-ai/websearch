@@ -4,7 +4,7 @@
  "description": "Abstract web search interface for Token Ring",
  "dependencies": {
   "@tokenring-ai/agent": "0.1.0",
-  "zod": "^4.0.17"
+  "zod": "^4.1.11"
  },
  "exports": {
   ".": "./index.ts",
