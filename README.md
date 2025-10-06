@@ -104,6 +104,44 @@ These tools can be invoked by agents for automated tasks.
   - Supports flags like `--country`, `--num`, `--render`.
   - Displays results or provider status in chat. Uses `parseArgs` for option parsing.
 
+### Global Scripting Functions
+
+When `@tokenring-ai/scripting` is available, the websearch package registers native functions for use in scripts:
+
+- **searchWeb(query)**: Performs a web search and returns JSON results.
+  ```bash
+  /var $results = searchWeb("artificial intelligence")
+  /call searchWeb("latest tech news")
+  ```
+
+- **searchNews(query)**: Searches for news articles and returns JSON results.
+  ```bash
+  /var $news = searchNews("climate change")
+  /call searchNews("stock market")
+  ```
+
+- **fetchPage(url)**: Fetches the HTML content of a web page.
+  ```bash
+  /var $html = fetchPage("https://example.com")
+  /call fetchPage("https://news.site/article")
+  ```
+
+These functions integrate with the scripting system for automated research workflows:
+
+```bash
+# Research workflow
+/var $results = searchWeb("quantum computing")
+/var $analysis = llm("Analyze these search results: $results")
+
+# News aggregation
+/var $news = searchNews("AI breakthroughs")
+/var $summary = llm("Summarize these news articles: $news")
+
+# Content extraction
+/var $html = fetchPage("https://example.com/article")
+/var $content = llm("Extract the main content from this HTML: $html")
+```
+
 ## Usage Examples
 
 ### 1. Registering a Provider and Basic Search
@@ -152,6 +190,7 @@ This searches the web, displays results in chat (truncated to 500 chars).
 - **Search Options** (WebSearchProviderOptions): `countryCode` (e.g., 'US'), `language` (e.g., 'en'), `location` (e.g., 'New York,US'), `num` (positive int, default provider-specific), `page` (positive int), `timeout` (ms).
 - **Page Fetch Options** (WebPageOptions): `render` (boolean, for JS-heavy sites), `countryCode`, `timeout`.
 - **Provider Management**: Use registry methods to switch providers dynamically.
+- **Scripting Integration**: Automatically registers global functions when `@tokenring-ai/scripting` is available.
 - No environment variables defined; configure via provider constructors (e.g., API keys).
 
 ## API Reference
@@ -174,6 +213,7 @@ Interfaces: `WebSearchProviderOptions`, `WebSearchResult`, `WebPageOptions`, `We
 ## Dependencies
 
 - `@tokenring-ai/agent` (^0.1.0): Core agent framework and types.
+- `@tokenring-ai/scripting` (^0.1.0): Optional, for global scripting functions.
 - `zod` (^4.0.17): Schema validation for tool inputs.
 
 Internal utilities like `KeyedRegistryWithSingleSelection` from `@tokenring-ai/utility`.
