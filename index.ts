@@ -13,7 +13,7 @@ export const WebSearchConfigSchema = z.object({
 }).optional();
 
 
-export const packageInfo: TokenRingPackage = {
+export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
@@ -51,7 +51,7 @@ export const packageInfo: TokenRingPackage = {
           }
         );
       });
-      agentTeam.addTools(packageInfo, tools);
+      agentTeam.addTools(packageJSON.name, tools);
       agentTeam.addChatCommands(chatCommands);
       agentTeam.addServices(new WebSearchService());
     }
@@ -63,7 +63,7 @@ export const packageInfo: TokenRingPackage = {
       agentTeam.services.requireItemByType(WebSearchService).setActiveProvider(config.defaultProvider);
     }
   }
-};
+} as TokenRingPackage;
 
 export {default as WebSearchService} from "./WebSearchService.ts";
 export {default as WebSearchProvider} from "./WebSearchProvider.ts";
