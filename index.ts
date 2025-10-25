@@ -1,4 +1,5 @@
-import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import {AgentCommandService, AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import {AIService} from "@tokenring-ai/ai-client";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService.js";
 import {z} from "zod";
@@ -20,7 +21,7 @@ export default {
   install(agentTeam: AgentTeam) {
     const config = agentTeam.getConfigSlice('websearch', WebSearchConfigSchema);
     if (config) {
-      agentTeam.services.waitForItemByType(ScriptingService).then((scriptingService: ScriptingService) => {
+      agentTeam.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
         scriptingService.registerFunction("searchWeb", {
             type: 'native',
             params: ['query'],
@@ -51,8 +52,12 @@ export default {
           }
         );
       });
-      agentTeam.addTools(packageJSON.name, tools);
-      agentTeam.addChatCommands(chatCommands);
+      agentTeam.waitForService(AIService, aiService =>
+        aiService.addTools(packageJSON.name, tools)
+      );
+      agentTeam.waitForService(AgentCommandService, agentCommandService =>
+        agentCommandService.addAgentCommands(chatCommands)
+      );
       agentTeam.addServices(new WebSearchService());
     }
   },
@@ -60,7 +65,7 @@ export default {
   start(agentTeam: AgentTeam) {
     const config = agentTeam.getConfigSlice("websearch", WebSearchConfigSchema);
     if (config) {
-      agentTeam.services.requireItemByType(WebSearchService).setActiveProvider(config.defaultProvider);
+      agentTeam.requireService(WebSearchService).setActiveProvider(config.defaultProvider);
     }
   }
 } as TokenRingPackage;
