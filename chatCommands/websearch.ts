@@ -43,22 +43,22 @@ interface WebSearchArgs {
 }
 
 function parseWebSearchArgs(args: string[]): WebSearchArgs {
-  const { values, positionals } = parseArgs({
+  const {values, positionals} = parseArgs({
     args,
     options: {
-      country: { type: 'string' },
-      language: { type: 'string' },
-      location: { type: 'string' },
-      num: { type: 'string' },
-      page: { type: 'string' },
-      render: { type: 'boolean' }
+      country: {type: 'string'},
+      language: {type: 'string'},
+      location: {type: 'string'},
+      num: {type: 'string'},
+      page: {type: 'string'},
+      render: {type: 'boolean'}
     },
     allowPositionals: true,
     strict: false
   });
 
   const flags: WebSearchArgs["flags"] = {};
-  
+
   // Convert string numbers to actual numbers for num and page
   if (values.country) flags.country = values.country as string;
   if (values.language) flags.language = values.language as string;
@@ -67,11 +67,11 @@ function parseWebSearchArgs(args: string[]): WebSearchArgs {
   if (values.page) flags.page = Number(values.page);
   if (values.render) flags.render = values.render as boolean;
 
-  return { flags, rest: positionals };
+  return {flags, rest: positionals};
 }
 
 export async function execute(remainder: string, agent: Agent): Promise<void> {
-  
+
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   const [sub, ...rest] = remainder.trim().split(/\s+/);

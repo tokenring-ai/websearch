@@ -16,7 +16,7 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ html: string }> {
-  
+
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   if (!url) {

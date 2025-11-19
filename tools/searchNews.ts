@@ -22,7 +22,7 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ results?: any }> {
-  
+
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   if (!query) {
