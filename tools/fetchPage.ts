@@ -1,19 +1,16 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
-export const name = "websearch/fetchPage";
+const name = "websearch/fetchPage";
 
-export async function execute(
+async function execute(
   {
     url,
     render,
     countryCode
-  }: {
-    url?: string;
-    render?: boolean;
-    countryCode?: string;
-  },
+  }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ html: string }> {
 
@@ -31,10 +28,14 @@ export async function execute(
   return {html: result.html};
 }
 
-export const description = "Fetch a web page using the active web search provider";
+const description = "Fetch a web page using the active web search provider";
 
-export const inputSchema = z.object({
+const inputSchema = z.object({
   url: z.string().url().describe("URL to fetch"),
   render: z.boolean().optional().describe("Enable JavaScript rendering"),
   countryCode: z.string().optional().describe("Country code"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

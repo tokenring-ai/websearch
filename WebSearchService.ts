@@ -1,5 +1,6 @@
 import {Agent} from "@tokenring-ai/agent";
-import {TokenRingService} from "@tokenring-ai/agent/types";
+
+import {TokenRingService} from "@tokenring-ai/app/types";
 import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/registry/KeyedRegistryWithSingleSelection";
 import WebSearchProvider, {
   type WebPageOptions,

@@ -1,8 +1,9 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {parseArgs} from "node:util";
 import WebSearchService from "../WebSearchService.js";
 
-export const description = "/websearch [action] - Web search operations";
+const description = "/websearch [action] - Web search operations";
 
 export function help(): Array<string> {
   return [
@@ -70,7 +71,7 @@ function parseWebSearchArgs(args: string[]): WebSearchArgs {
   return {flags, rest: positionals};
 }
 
-export async function execute(remainder: string, agent: Agent): Promise<void> {
+async function execute(remainder: string, agent: Agent): Promise<void> {
 
   const webSearch = agent.requireServiceByType(WebSearchService);
 
@@ -138,3 +139,9 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
     agent.infoLine("Unknown action. Use: search, news, fetch, provider");
   }
 }
+
+export default {
+  description,
+  execute,
+  help,
+} as TokenRingAgentCommand

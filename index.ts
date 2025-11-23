@@ -1,5 +1,7 @@
-import {AgentCommandService, AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import TokenRingApp from "@tokenring-ai/app"; 
+import {AgentCommandService} from "@tokenring-ai/agent";
 import {ChatService} from "@tokenring-ai/chat";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService.js";
 import {z} from "zod";
@@ -18,10 +20,10 @@ export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(agentTeam: AgentTeam) {
-    const config = agentTeam.getConfigSlice('websearch', WebSearchConfigSchema);
+  install(app: TokenRingApp) {
+    const config = app.getConfigSlice('websearch', WebSearchConfigSchema);
     if (config) {
-      agentTeam.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
+      app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
         scriptingService.registerFunction("searchWeb", {
             type: 'native',
             params: ['query'],
@@ -52,23 +54,23 @@ export default {
           }
         );
       });
-      agentTeam.waitForService(ChatService, chatService =>
+      app.waitForService(ChatService, chatService =>
         chatService.addTools(packageJSON.name, tools)
       );
-      agentTeam.waitForService(AgentCommandService, agentCommandService =>
+      app.waitForService(AgentCommandService, agentCommandService =>
         agentCommandService.addAgentCommands(chatCommands)
       );
-      agentTeam.addServices(new WebSearchService());
+      app.addServices(new WebSearchService());
     }
   },
 
-  start(agentTeam: AgentTeam) {
-    const config = agentTeam.getConfigSlice("websearch", WebSearchConfigSchema);
+  start(app: TokenRingApp) {
+    const config = app.getConfigSlice("websearch", WebSearchConfigSchema);
     if (config) {
-      agentTeam.requireService(WebSearchService).setActiveProvider(config.defaultProvider);
+      app.requireService(WebSearchService).setActiveProvider(config.defaultProvider);
     }
   }
-} as TokenRingPackage;
+} as TokenRingPlugin;
 
 export {default as WebSearchService} from "./WebSearchService.ts";
 export {default as WebSearchProvider} from "./WebSearchProvider.ts";
