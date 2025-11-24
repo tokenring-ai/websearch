@@ -5,7 +5,7 @@ import WebSearchService from "../WebSearchService.js";
 
 const description = "/websearch [action] - Web search operations";
 
-export function help(): Array<string> {
+function help(): Array<string> {
   return [
     "/websearch [action] <query> [options] - Web search operations",
     "  Actions:",

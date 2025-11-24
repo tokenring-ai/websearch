@@ -31,7 +31,7 @@ async function execute(
 const description = "Fetch a web page using the active web search provider";
 
 const inputSchema = z.object({
-  url: z.string().url().describe("URL to fetch"),
+  url: z.string().describe("URL to fetch"),
   render: z.boolean().optional().describe("Enable JavaScript rendering"),
   countryCode: z.string().optional().describe("Country code"),
 });
