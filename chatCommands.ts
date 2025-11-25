@@ -1,1 +1,1 @@
-export {default as websearch} from "./chatCommands/websearch.ts";
+export {default as websearch} from "./commands/websearch.ts";
