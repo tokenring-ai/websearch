@@ -29,7 +29,7 @@ export default {
             params: ['query'],
             async execute(this: ScriptingThis, query: string): Promise<string> {
               const result = await this.agent.requireServiceByType(WebSearchService).searchWeb(query);
-              return JSON.stringify(result.results);
+              return JSON.stringify(result);
             }
           }
         );
@@ -39,7 +39,7 @@ export default {
             params: ['query'],
             async execute(this: ScriptingThis, query: string): Promise<string> {
               const result = await this.agent.requireServiceByType(WebSearchService).searchNews(query);
-              return JSON.stringify(result.results);
+              return JSON.stringify(result);
             }
           }
         );
@@ -49,7 +49,21 @@ export default {
             params: ['url'],
             async execute(this: ScriptingThis, url: string): Promise<string> {
               const result = await this.agent.requireServiceByType(WebSearchService).fetchPage(url);
-              return result.html;
+              return result.markdown;
+            }
+          }
+        );
+
+        scriptingService.registerFunction("deepSearch", {
+            type: 'native',
+            params: ['query', 'searchCount', 'newsCount', 'fetchCount'],
+            async execute(this: ScriptingThis, query: string, searchCount?: string, newsCount?: string, fetchCount?: string): Promise<string> {
+              const result = await this.agent.requireServiceByType(WebSearchService).deepSearch(query, {
+                searchCount: searchCount ? parseInt(searchCount) : undefined,
+                newsCount: newsCount ? parseInt(newsCount) : undefined,
+                fetchCount: fetchCount ? parseInt(fetchCount) : undefined
+              });
+              return JSON.stringify(result);
             }
           }
         );

@@ -1,6 +1,7 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
+import {NewsSearchResult} from "../WebSearchProvider.ts";
 import WebSearchService from "../WebSearchService.js";
 
 const name = "websearch/searchNews";
@@ -15,7 +16,7 @@ async function execute(
     page,
   }: z.infer<typeof inputSchema>,
   agent: Agent,
-): Promise<{ results?: any }> {
+): Promise<NewsSearchResult> {
 
   const webSearch = agent.requireServiceByType(WebSearchService);
 
@@ -24,14 +25,13 @@ async function execute(
   }
 
   agent.infoLine(`[${name}] Searching news: ${query}`);
-  const result = await webSearch.searchNews(query, {
+  return await webSearch.searchNews(query, {
     countryCode,
     language,
     location,
     num,
     page,
   });
-  return {results: result.results};
 }
 
 const description = "Search news using the active web search provider";

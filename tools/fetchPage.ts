@@ -12,7 +12,7 @@ async function execute(
     countryCode
   }: z.infer<typeof inputSchema>,
   agent: Agent,
-): Promise<{ html: string }> {
+): Promise<{ markdown: string, metadata?: Record<string, any> }> {
 
   const webSearch = agent.requireServiceByType(WebSearchService);
 
@@ -25,7 +25,7 @@ async function execute(
     render,
     countryCode
   });
-  return {html: result.html};
+  return {markdown: result.markdown};
 }
 
 const description = "Fetch a web page using the active web search provider";

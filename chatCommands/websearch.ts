@@ -12,6 +12,7 @@ function help(): Array<string> {
     "    search <query>  - Search the web",
     "    news <query>    - Search news",
     "    fetch <url>     - Fetch a web page",
+    "    deep <query>    - Deep search: search then fetch pages",
     "    provider [name] - Show/set active provider",
     "",
     "  Options:",
@@ -21,11 +22,15 @@ function help(): Array<string> {
     "    --num <n>          - Number of results",
     "    --page <n>         - Page number",
     "    --render           - Enable JS rendering (fetch only)",
+    "    --search <n>       - Number of web results (deep only, default: 10)",
+    "    --news <n>         - Number of news results (deep only, default: 0)",
+    "    --fetch <n>        - Number to fetch (deep only, default: 5)",
     "",
     "  Examples:",
     "    /websearch search typescript tutorial",
     "    /websearch news artificial intelligence --num 5",
     "    /websearch fetch https://example.com --render",
+    "    /websearch deep quantum computing --search 20 --news 5 --fetch 10",
     "    /websearch provider",
     "    /websearch provider tavily",
   ];
@@ -39,6 +44,9 @@ interface WebSearchArgs {
     num?: number;
     page?: number;
     render?: boolean;
+    search?: number;
+    news?: number;
+    fetch?: number;
   }
   rest: string[];
 }
@@ -52,7 +60,10 @@ function parseWebSearchArgs(args: string[]): WebSearchArgs {
       location: {type: 'string'},
       num: {type: 'string'},
       page: {type: 'string'},
-      render: {type: 'boolean'}
+      render: {type: 'boolean'},
+      search: {type: 'string'},
+      news: {type: 'string'},
+      fetch: {type: 'string'}
     },
     allowPositionals: true,
     strict: false
@@ -60,13 +71,15 @@ function parseWebSearchArgs(args: string[]): WebSearchArgs {
 
   const flags: WebSearchArgs["flags"] = {};
 
-  // Convert string numbers to actual numbers for num and page
   if (values.country) flags.country = values.country as string;
   if (values.language) flags.language = values.language as string;
   if (values.location) flags.location = values.location as string;
   if (values.num) flags.num = Number(values.num);
   if (values.page) flags.page = Number(values.page);
   if (values.render) flags.render = values.render as boolean;
+  if (values.search) flags.search = Number(values.search);
+  if (values.news) flags.news = Number(values.news);
+  if (values.fetch) flags.fetch = Number(values.fetch);
 
   return {flags, rest: positionals};
 }
@@ -96,7 +109,7 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
       num: flags.num as number,
       page: flags.page as number,
     });
-    agent.infoLine(`Search results: ${JSON.stringify(result.results).slice(0, 500)}...`);
+    agent.infoLine(`Search results: ${JSON.stringify(result).slice(0, 500)}...`);
   } else if (sub === "news") {
     if (!query) {
       agent.errorLine("Usage: /websearch news <query> [flags]");
@@ -109,7 +122,7 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
       num: flags.num as number,
       page: flags.page as number,
     });
-    agent.infoLine(`News results: ${JSON.stringify(result.results).slice(0, 500)}...`);
+    agent.infoLine(`News results: ${JSON.stringify(result).slice(0, 500)}...`);
   } else if (sub === "fetch") {
     if (!query) {
       agent.errorLine("Usage: /websearch fetch <url> [flags]");
@@ -119,7 +132,22 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
       render: !!flags.render,
       countryCode: flags.country,
     });
-    agent.infoLine(`Fetched ${result.html.length} characters`);
+    agent.infoLine(`Fetched ${result.markdown.length} characters`);
+  } else if (sub === "deep") {
+    if (!query) {
+      agent.errorLine("Usage: /websearch deep <query> [flags]");
+      return;
+    }
+    const result = await webSearch.deepSearch(query, {
+      searchCount: flags.search,
+      newsCount: flags.news,
+      fetchCount: flags.fetch,
+      countryCode: flags.country,
+      language: flags.language,
+      location: flags.location,
+    });
+    agent.infoLine(`Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`);
+    result.pages.forEach((p, i) => agent.infoLine(`  [${i + 1}] ${p.url} (${p.markdown.length} chars)`));
   } else if (sub === "provider") {
     if (query) {
       const available = webSearch.getAvailableProviders();
@@ -136,7 +164,7 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
       agent.infoLine(`Available providers: ${available.join(", ")}`);
     }
   } else {
-    agent.infoLine("Unknown action. Use: search, news, fetch, provider");
+    agent.infoLine("Unknown action. Use: search, news, fetch, deep, provider");
   }
 }
 
