@@ -3,38 +3,120 @@ import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {parseArgs} from "node:util";
 import WebSearchService from "../WebSearchService.js";
 
-const description = "/websearch [action] - Web search operations";
+const description = "/websearch - Web search operations";
 
-function help(): Array<string> {
-  return [
-    "/websearch [action] <query> [options] - Web search operations",
-    "  Actions:",
-    "    search <query>  - Search the web",
-    "    news <query>    - Search news",
-    "    fetch <url>     - Fetch a web page",
-    "    deep <query>    - Deep search: search then fetch pages",
-    "    provider [name] - Show/set active provider",
-    "",
-    "  Options:",
-    "    --country <code>   - Country code",
-    "    --language <code>  - Language code",
-    "    --location <name>  - Location name",
-    "    --num <n>          - Number of results",
-    "    --page <n>         - Page number",
-    "    --render           - Enable JS rendering (fetch only)",
-    "    --search <n>       - Number of web results (deep only, default: 10)",
-    "    --news <n>         - Number of news results (deep only, default: 0)",
-    "    --fetch <n>        - Number to fetch (deep only, default: 5)",
-    "",
-    "  Examples:",
-    "    /websearch search typescript tutorial",
-    "    /websearch news artificial intelligence --num 5",
-    "    /websearch fetch https://example.com --render",
-    "    /websearch deep quantum computing --search 20 --news 5 --fetch 10",
-    "    /websearch provider",
-    "    /websearch provider tavily",
-  ];
-}
+const help: string = `# WEB SEARCH COMMAND HELP
+
+## Usage
+
+/websearch <action> <query> [options]
+
+## ACTIONS
+
+### search <query>
+
+Perform a general web search
+- Returns web search results with titles, URLs, and descriptions
+- Supports all location and language options
+
+**Example:**
+/websearch search typescript tutorial
+
+### news <query>
+
+Search for news articles
+- Returns current news results with sources and dates
+- Great for staying updated on topics
+
+**Example:**
+/websearch news artificial intelligence
+
+### fetch <url>
+
+Fetch and extract content from a specific web page
+- Renders JavaScript content if --render flag is used
+- Returns markdown-formatted content
+
+**Example:**
+/websearch fetch https://example.com
+
+### deep <query>
+
+Perform comprehensive search with content fetching
+- Combines search and fetch operations in one command
+- Configurable number of search, news, and fetch results
+
+**Example:**
+/websearch deep quantum computing --search 10 --fetch 3
+
+### provider [name]
+
+Manage search providers
+- Without name: Show active and available providers
+- With name: Set active provider (if available)
+
+**Examples:**
+/websearch provider
+/websearch provider tavily
+
+## OPTIONS
+
+### General Options (search, news, deep)
+
+- **--country <code>** - Country code for localized results (e.g., 'us', 'uk', 'de')
+- **--language <code>** - Language code for content (e.g., 'en', 'es', 'fr')
+- **--location <name>** - Location name for geo-targeted results
+- **--num <n>** - Number of results to return (default: varies by action)
+- **--page <n>** - Page number for pagination
+
+### Fetch-specific Options
+
+- **--render** - Enable JavaScript rendering for dynamic content
+
+### Deep-specific Options
+
+- **--search <n>** - Number of web search results (default: 10)
+- **--news <n>** - Number of news results (default: 0)
+- **--fetch <n>** - Number of pages to fetch (default: 5)
+
+## EXAMPLES
+
+# Basic Search
+/websearch search machine learning basics
+
+# News Search with Limit
+/websearch news cryptocurrency --num 5
+
+# Location-specific Search
+/websearch search restaurants --location 'New York' --country us
+
+# Fetch Web Page
+/websearch fetch https://developer.mozilla.org/en-US/docs/Web/JavaScript
+
+# Fetch with JavaScript Rendering
+/websearch fetch https://example.com --render
+
+# Comprehensive Deep Search
+/websearch deep artificial intelligence --search 20 --news 5 --fetch 10
+
+# Deep Search with Localization
+/websearch deep climate change --search 15 --news 3 --fetch 5 --language en --country uk
+
+# View Providers
+/websearch provider
+
+# Set Provider
+/websearch provider tavily
+
+## NOTES
+
+- All search operations respect rate limits and may take a few seconds
+- Deep search is resource-intensive - use reasonable limits
+- Provider availability depends on your agent configuration
+- Country codes follow ISO 3166-1 alpha-2 standard
+- Language codes follow ISO 639-1 standard
+
+For more information, use /websearch provider to see available search providers.`;
 
 interface WebSearchArgs {
   flags: {
@@ -90,7 +172,7 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
 
   const [sub, ...rest] = remainder.trim().split(/\s+/);
   if (!sub) {
-    help().forEach((l) => agent.infoLine(l));
+    agent.infoLine(help);
     return;
   }
 
