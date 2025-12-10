@@ -12,7 +12,7 @@ import WebSearchService from "./WebSearchService.ts";
 
 export const WebSearchConfigSchema = z.object({
   defaultProvider: z.string(),
-  providers: z.record(z.string(), z.looseObject({type: z.string()}))
+  providers: z.record(z.string(), z.any())
 }).optional();
 
 
