@@ -79,4 +79,4 @@ export default {
       app.requireService(WebSearchService).setActiveProvider(config.defaultProvider);
     }
   }
-} as TokenRingPlugin;
+} satisfies TokenRingPlugin;
