@@ -3,7 +3,7 @@ import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
-const name = "websearch/fetchPage";
+const name = "websearch_fetchPage";
 
 async function execute(
   {

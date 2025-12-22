@@ -4,7 +4,7 @@ import {z} from "zod";
 import {NewsSearchResult} from "../WebSearchProvider.ts";
 import WebSearchService from "../WebSearchService.js";
 
-const name = "websearch/searchNews";
+const name = "websearch_searchNews";
 
 async function execute(
   {
