@@ -12,7 +12,7 @@ This package is designed to be used within a Token Ring AI project. To include i
 
 1. Install the package:
    ```bash
-   npm install @tokenring-ai/websearch
+   bun install @tokenring-ai/websearch
    ```
 
 2. Configure the plugin in your Token Ring application. The plugin will automatically register the service, tools, and chat commands when properly configured.
@@ -93,13 +93,83 @@ interface WebSearchResult {
   relatedSearches?: RelatedSearch[];
 }
 
+interface NewsItem {
+  title: string;
+  link: string;
+  snippet?: string;
+  date: string;
+  source: string;
+  position?: number;
+}
 interface NewsSearchResult {
   news: NewsItem[];
+}
+
+interface KnowledgeGraph {
+  position?: number;
+  title: string;
+  type: string;
+  website?: string;
+  imageUrl?: string;
+  description?: string;
+  descriptionSource?: string;
+  descriptionLink?: string;
+  attributes?: Record<string, string>;
+}
+
+interface Sitelink {
+  title: string;
+  link: string;
+}
+
+interface OrganicResult {
+  title: string;
+  link: string;
+  snippet: string;
+  sitelinks?: Sitelink[];
+  position: number;
+  date?: string;
+  attributes?: Record<string, string>;
+}
+
+interface PeopleAlsoAsk {
+  question: string;
+  snippet: string;
+  title: string;
+  link: string;
+}
+
+interface RelatedSearch {
+  position?: number;
+  query: string;
+}
+
+interface WebPageOptions {
+  render?: boolean;
+  countryCode?: string;
+  timeout?: number;
 }
 
 interface WebPageResult {
   markdown: string;
   metadata?: Record<string, string>;
+}
+
+interface DeepSearchOptions extends WebSearchProviderOptions {
+  searchCount?: number;     // Number of web results (default: 10)
+  newsCount?: number;       // Number of news results (default: 0)
+  fetchCount?: number;      // Number of pages to fetch (default: 5)
+  rerank?: (results: any[]) => Promise<any[]>; // Optional result reranking
+}
+
+interface DeepSearchResult {
+  results: any[];           // Web search results
+  news: NewsItem[];         // News search results
+  pages: Array<{            // Fetched page content
+    url: string;
+    markdown: string;
+    metadata?: Record<string, string>;
+  }>;
 }
 ```
 
@@ -123,26 +193,13 @@ This class implements the `TokenRingService` interface and serves as the central
 - **Deep Search:**
   - `deepSearch(query: string, options?: DeepSearchOptions): Promise<DeepSearchResult>` – Comprehensive search that combines web search, news search, and page fetching
 
-#### DeepSearch Options and Results:
+#### Deep Search Implementation Details:
 
-```typescript
-interface DeepSearchOptions extends WebSearchProviderOptions {
-  searchCount?: number;     // Number of web results (default: 10)
-  newsCount?: number;       // Number of news results (default: 0)
-  fetchCount?: number;      // Number of pages to fetch (default: 5)
-  rerank?: (results: any[]) => Promise<any[]>; // Optional result reranking
-}
-
-interface DeepSearchResult {
-  results: any[];           // Web search results
-  news: NewsItem[];         // News search results
-  pages: Array<{            // Fetched page content
-    url: string;
-    markdown: string;
-    metadata?: Record<string, string>;
-  }>;
-}
-```
+The deep search combines multiple search operations:
+1. Performs web search to get links
+2. Performs news search (optional)
+3. Fetches content from the top results
+4. Returns combined results
 
 ### Plugin Integration
 
@@ -153,7 +210,7 @@ The package exports a complete Token Ring plugin that integrates with the applic
 ```typescript
 export const WebSearchConfigSchema = z.object({
   defaultProvider: z.string(),
-  providers: z.record(z.string(), z.looseObject({type: z.string()}))
+  providers: z.record(z.string(), z.any())
 }).optional();
 ```
 
@@ -262,6 +319,8 @@ Tools are executable functions integrated with the agent framework. They wrap se
 /websearch provider
 /websearch provider your-provider-name
 ```
+
+The command provides comprehensive help and supports various options for localized searches, result pagination, and content rendering.
 
 ### Global Scripting Functions
 
@@ -428,13 +487,17 @@ class WebSearchService implements TokenRingService {
 
 ## Dependencies
 
-- `@tokenring-ai/agent` (^0.1.0): Core agent framework and types
-- `@tokenring-ai/utility` (^0.1.0): Utility classes like KeyedRegistryWithSingleSelection
+- `@tokenring-ai/agent` (^0.2.0): Core agent framework and types
+- `@tokenring-ai/app` (^0.2.0): Application framework
+- `@tokenring-ai/chat` (^0.2.0): Chat service
+- `@tokenring-ai/utility` (^0.2.0): Utility classes like KeyedRegistryWithSingleSelection
+- `@tokenring-ai/scripting` (^0.2.0): Scripting service
 - `zod` (^4.1.13): Schema validation for configuration and inputs
 
 ## Contributing/Notes
 
 ### Implementing Providers:
+
 To create a concrete search provider, extend the `WebSearchProvider` abstract class:
 
 ```typescript
@@ -457,6 +520,7 @@ class YourSearchProvider extends WebSearchProvider {
 ```
 
 ### Best Practices:
+
 - Handle errors gracefully (rate limits, invalid queries, network issues)
 - Implement proper timeout handling
 - Normalize result structures when possible
@@ -465,12 +529,14 @@ class YourSearchProvider extends WebSearchProvider {
 - Respect robots.txt and terms of service
 
 ### Testing:
+
 - Add unit tests for provider implementations
 - Test integration with different search engines
 - Test error handling and edge cases
 - Test the deep search functionality thoroughly
 
 ### Limitations:
+
 - Abstract only - no built-in search engine implementations
 - Results structure is provider-dependent
 - Binary/non-text content not supported in fetches
@@ -478,4 +544,5 @@ class YourSearchProvider extends WebSearchProvider {
 - No built-in rate limiting or caching (implement in providers)
 
 ### License:
+
 MIT. Contributions welcome via pull requests. Focus on new providers, enhancements to the interface, or improved documentation.
