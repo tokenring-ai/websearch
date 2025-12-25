@@ -86,11 +86,13 @@ This abstract class defines the interface that concrete search providers must im
 #### Result Types:
 
 ```typescript
-interface WebSearchResult {
-  knowledgeGraph?: KnowledgeGraph;
-  organic: OrganicResult[];
-  peopleAlsoAsk?: PeopleAlsoAsk[];
-  relatedSearches?: RelatedSearch[];
+interface WebSearchProviderOptions {
+  countryCode?: string;
+  language?: string;
+  location?: string;
+  num?: number;
+  page?: number;
+  timeout?: number;
 }
 
 interface NewsItem {
@@ -142,6 +144,13 @@ interface PeopleAlsoAsk {
 interface RelatedSearch {
   position?: number;
   query: string;
+}
+
+interface WebSearchResult {
+  knowledgeGraph?: KnowledgeGraph;
+  organic: OrganicResult[];
+  peopleAlsoAsk?: PeopleAlsoAsk[];
+  relatedSearches?: RelatedSearch[];
 }
 
 interface WebPageOptions {
