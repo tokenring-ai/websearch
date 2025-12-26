@@ -1,23 +1,26 @@
-import TokenRingApp from "@tokenring-ai/app"; 
 import {AgentCommandService} from "@tokenring-ai/agent";
+import TokenRingApp, {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
-import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
+import {z} from "zod";
 import chatCommands from "./chatCommands.ts";
 import {WebSearchConfigSchema} from "./index.ts";
 import packageJSON from './package.json' with {type: 'json'};
 import tools from "./tools.ts";
 import WebSearchService from "./WebSearchService.ts";
 
+const packageConfigSchema = z.object({
+  websearch: WebSearchConfigSchema.optional()
+});
 
 export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app: TokenRingApp) {
-    const config = app.getConfigSlice('websearch', WebSearchConfigSchema);
-    if (config) {
+  install(app, config) {
+    // const config = app.getConfigSlice('websearch', WebSearchConfigSchema);
+    if (config.websearch) {
       app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
         scriptingService.registerFunction("searchWeb", {
             type: 'native',
@@ -73,10 +76,11 @@ export default {
     }
   },
 
-  start(app: TokenRingApp) {
-    const config = app.getConfigSlice("websearch", WebSearchConfigSchema);
-    if (config) {
-      app.requireService(WebSearchService).setActiveProvider(config.defaultProvider);
+  start(app: TokenRingApp, config) {
+    // const config = app.getConfigSlice("websearch", WebSearchConfigSchema);
+    if (config.websearch) {
+      app.requireService(WebSearchService).setActiveProvider(config.websearch.defaultProvider);
     }
-  }
-} satisfies TokenRingPlugin;
+  },
+  config: packageConfigSchema
+} satisfies TokenRingPlugin<typeof packageConfigSchema>;
