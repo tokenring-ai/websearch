@@ -19,7 +19,6 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    // const config = app.getConfigSlice('websearch', WebSearchConfigSchema);
     if (config.websearch) {
       app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
         scriptingService.registerFunction("searchWeb", {
@@ -77,7 +76,6 @@ export default {
   },
 
   start(app: TokenRingApp, config) {
-    // const config = app.getConfigSlice("websearch", WebSearchConfigSchema);
     if (config.websearch) {
       app.requireService(WebSearchService).setActiveProvider(config.websearch.defaultProvider);
     }
