@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
@@ -24,7 +24,7 @@ async function execute(
   const result = await webSearch.fetchPage(url, {
     render,
     countryCode
-  });
+  }, agent);
   return {markdown: result.markdown};
 }
 

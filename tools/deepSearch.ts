@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
@@ -31,7 +31,7 @@ async function execute(
     countryCode,
     language,
     location,
-  });
+  }, agent);
 }
 
 const description = "Perform a deep search: search the web, then fetch and return full page content for top results";

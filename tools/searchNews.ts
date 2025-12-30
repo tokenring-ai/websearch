@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import {NewsSearchResult} from "../WebSearchProvider.ts";
 import WebSearchService from "../WebSearchService.js";
@@ -31,7 +31,7 @@ async function execute(
     location,
     num,
     page,
-  });
+  }, agent);
 }
 
 const description = "Search news using the active web search provider";

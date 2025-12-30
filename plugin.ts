@@ -1,5 +1,5 @@
 import {AgentCommandService} from "@tokenring-ai/agent";
-import TokenRingApp, {TokenRingPlugin} from "@tokenring-ai/app";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
@@ -19,66 +19,60 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    if (config.websearch) {
-      app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
-        scriptingService.registerFunction("searchWeb", {
-            type: 'native',
-            params: ['query'],
-            async execute(this: ScriptingThis, query: string): Promise<string> {
-              const result = await this.agent.requireServiceByType(WebSearchService).searchWeb(query);
-              return JSON.stringify(result);
-            }
+    if (! config.websearch) return;
+    app.addServices(new WebSearchService(config.websearch));
+    app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
+      scriptingService.registerFunction("searchWeb", {
+          type: 'native',
+          params: ['query'],
+          async execute(this: ScriptingThis, query: string): Promise<string> {
+            const result = await this.agent.requireServiceByType(WebSearchService).searchWeb(query, undefined, this.agent);
+            return JSON.stringify(result);
           }
-        );
-
-        scriptingService.registerFunction("searchNews", {
-            type: 'native',
-            params: ['query'],
-            async execute(this: ScriptingThis, query: string): Promise<string> {
-              const result = await this.agent.requireServiceByType(WebSearchService).searchNews(query);
-              return JSON.stringify(result);
-            }
-          }
-        );
-
-        scriptingService.registerFunction("fetchPage", {
-            type: 'native',
-            params: ['url'],
-            async execute(this: ScriptingThis, url: string): Promise<string> {
-              const result = await this.agent.requireServiceByType(WebSearchService).fetchPage(url);
-              return result.markdown;
-            }
-          }
-        );
-
-        scriptingService.registerFunction("deepSearch", {
-            type: 'native',
-            params: ['query', 'searchCount', 'newsCount', 'fetchCount'],
-            async execute(this: ScriptingThis, query: string, searchCount?: string, newsCount?: string, fetchCount?: string): Promise<string> {
-              const result = await this.agent.requireServiceByType(WebSearchService).deepSearch(query, {
-                searchCount: searchCount ? parseInt(searchCount) : undefined,
-                newsCount: newsCount ? parseInt(newsCount) : undefined,
-                fetchCount: fetchCount ? parseInt(fetchCount) : undefined
-              });
-              return JSON.stringify(result);
-            }
-          }
-        );
-      });
-      app.waitForService(ChatService, chatService =>
-        chatService.addTools(packageJSON.name, tools)
+        }
       );
-      app.waitForService(AgentCommandService, agentCommandService =>
-        agentCommandService.addAgentCommands(chatCommands)
+
+      scriptingService.registerFunction("searchNews", {
+          type: 'native',
+          params: ['query'],
+          async execute(this: ScriptingThis, query: string): Promise<string> {
+            const result = await this.agent.requireServiceByType(WebSearchService).searchNews(query, undefined, this.agent);
+            return JSON.stringify(result);
+          }
+        }
       );
-      app.addServices(new WebSearchService());
-    }
+
+      scriptingService.registerFunction("fetchPage", {
+          type: 'native',
+          params: ['url'],
+          async execute(this: ScriptingThis, url: string): Promise<string> {
+            const result = await this.agent.requireServiceByType(WebSearchService).fetchPage(url, undefined, this.agent);
+            return result.markdown;
+          }
+        }
+      );
+
+      scriptingService.registerFunction("deepSearch", {
+          type: 'native',
+          params: ['query', 'searchCount', 'newsCount', 'fetchCount'],
+          async execute(this: ScriptingThis, query: string, searchCount?: string, newsCount?: string, fetchCount?: string): Promise<string> {
+            const result = await this.agent.requireServiceByType(WebSearchService).deepSearch(query, {
+              searchCount: searchCount ? parseInt(searchCount) : undefined,
+              newsCount: newsCount ? parseInt(newsCount) : undefined,
+              fetchCount: fetchCount ? parseInt(fetchCount) : undefined
+            }, this.agent);
+            return JSON.stringify(result);
+          }
+        }
+      );
+    });
+    app.waitForService(ChatService, chatService =>
+      chatService.addTools(packageJSON.name, tools)
+    );
+    app.waitForService(AgentCommandService, agentCommandService =>
+      agentCommandService.addAgentCommands(chatCommands)
+    );
   },
 
-  start(app: TokenRingApp, config) {
-    if (config.websearch) {
-      app.requireService(WebSearchService).setActiveProvider(config.websearch.defaultProvider);
-    }
-  },
   config: packageConfigSchema
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;

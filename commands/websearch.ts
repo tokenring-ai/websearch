@@ -1,7 +1,10 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import {parseArgs} from "node:util";
-import WebSearchService from "../WebSearchService.js";
+import createSubcommandRouter from "@tokenring-ai/agent/util/subcommandRouter";
+import {deep} from "./websearch/deep.ts";
+import {fetch} from "./websearch/fetch.ts";
+import {news} from "./websearch/news.ts";
+import {provider} from "./websearch/provider.ts";
+import {search} from "./websearch/search.ts";
 
 const description = "/websearch - Web search operations";
 
@@ -118,137 +121,13 @@ Manage search providers
 
 For more information, use /websearch provider to see available search providers.`;
 
-interface WebSearchArgs {
-  flags: {
-    country?: string;
-    language?: string;
-    location?: string;
-    num?: number;
-    page?: number;
-    render?: boolean;
-    search?: number;
-    news?: number;
-    fetch?: number;
-  }
-  rest: string[];
-}
-
-function parseWebSearchArgs(args: string[]): WebSearchArgs {
-  const {values, positionals} = parseArgs({
-    args,
-    options: {
-      country: {type: 'string'},
-      language: {type: 'string'},
-      location: {type: 'string'},
-      num: {type: 'string'},
-      page: {type: 'string'},
-      render: {type: 'boolean'},
-      search: {type: 'string'},
-      news: {type: 'string'},
-      fetch: {type: 'string'}
-    },
-    allowPositionals: true,
-    strict: false
-  });
-
-  const flags: WebSearchArgs["flags"] = {};
-
-  if (values.country) flags.country = values.country as string;
-  if (values.language) flags.language = values.language as string;
-  if (values.location) flags.location = values.location as string;
-  if (values.num) flags.num = Number(values.num);
-  if (values.page) flags.page = Number(values.page);
-  if (values.render) flags.render = values.render as boolean;
-  if (values.search) flags.search = Number(values.search);
-  if (values.news) flags.news = Number(values.news);
-  if (values.fetch) flags.fetch = Number(values.fetch);
-
-  return {flags, rest: positionals};
-}
-
-async function execute(remainder: string, agent: Agent): Promise<void> {
-
-  const webSearch = agent.requireServiceByType(WebSearchService);
-
-  const [sub, ...rest] = remainder.trim().split(/\s+/);
-  if (!sub) {
-    agent.infoLine(help);
-    return;
-  }
-
-  const {flags, rest: queryParts} = parseWebSearchArgs(rest);
-  const query = queryParts.join(" ");
-
-  if (sub === "search") {
-    if (!query) {
-      agent.errorLine("Usage: /websearch search <query> [flags]");
-      return;
-    }
-    const result = await webSearch.searchWeb(query, {
-      countryCode: flags.country,
-      language: flags.language,
-      location: flags.location,
-      num: flags.num as number,
-      page: flags.page as number,
-    });
-    agent.infoLine(`Search results: ${JSON.stringify(result).slice(0, 500)}...`);
-  } else if (sub === "news") {
-    if (!query) {
-      agent.errorLine("Usage: /websearch news <query> [flags]");
-      return;
-    }
-    const result = await webSearch.searchNews(query, {
-      countryCode: flags.country,
-      language: flags.language,
-      location: flags.location,
-      num: flags.num as number,
-      page: flags.page as number,
-    });
-    agent.infoLine(`News results: ${JSON.stringify(result).slice(0, 500)}...`);
-  } else if (sub === "fetch") {
-    if (!query) {
-      agent.errorLine("Usage: /websearch fetch <url> [flags]");
-      return;
-    }
-    const result = await webSearch.fetchPage(query, {
-      render: !!flags.render,
-      countryCode: flags.country,
-    });
-    agent.infoLine(`Fetched ${result.markdown.length} characters`);
-  } else if (sub === "deep") {
-    if (!query) {
-      agent.errorLine("Usage: /websearch deep <query> [flags]");
-      return;
-    }
-    const result = await webSearch.deepSearch(query, {
-      searchCount: flags.search,
-      newsCount: flags.news,
-      fetchCount: flags.fetch,
-      countryCode: flags.country,
-      language: flags.language,
-      location: flags.location,
-    });
-    agent.infoLine(`Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`);
-    result.pages.forEach((p, i) => agent.infoLine(`  [${i + 1}] ${p.url} (${p.markdown.length} chars)`));
-  } else if (sub === "provider") {
-    if (query) {
-      const available = webSearch.getAvailableProviders();
-      if (available.includes(query)) {
-        webSearch.setActiveProvider(query);
-        agent.infoLine(`Provider set to: ${query}`);
-      } else {
-        agent.errorLine(`Provider '${query}' not available. Available: ${available.join(", ")}`);
-      }
-    } else {
-      const active = webSearch.getActiveProvider();
-      const available = webSearch.getAvailableProviders();
-      agent.infoLine(`Active provider: ${active || "none"}`);
-      agent.infoLine(`Available providers: ${available.join(", ")}`);
-    }
-  } else {
-    agent.infoLine("Unknown action. Use: search, news, fetch, deep, provider");
-  }
-}
+const execute = createSubcommandRouter({
+  search,
+  news,
+  fetch,
+  deep,
+  provider
+});
 
 export default {
   description,
