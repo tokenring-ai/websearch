@@ -1,5 +1,6 @@
 import {Agent} from "@tokenring-ai/agent";
 import {TokenRingService} from "@tokenring-ai/app/types";
+import deepMerge from "@tokenring-ai/utility/object/deepMerge";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import z from "zod";
 import {WebSearchAgentConfigSchema, WebSearchConfigSchema} from "./schema.ts";
@@ -26,13 +27,14 @@ export default class WebSearchService implements TokenRingService {
   constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {}
 
   async attach(agent: Agent): Promise<void> {
-    const config = agent.getAgentConfigSlice('websearch', WebSearchAgentConfigSchema);
+    const config = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice('websearch', WebSearchAgentConfigSchema));
     agent.initializeState(WebSearchState, config);
   }
 
-  getActiveProvider(agent: Agent): WebSearchProvider {
+  requireActiveProvider(agent: Agent): WebSearchProvider {
     const providerName = agent.getState(WebSearchState).provider;
-    return this.providerRegistry.requireItemByName(providerName ?? this.options.defaultProvider);
+    if (! providerName) throw new Error("No web search provider has been enabled.");
+    return this.providerRegistry.requireItemByName(providerName);
   }
 
   setActiveProvider(name: string, agent: Agent): void {
@@ -42,15 +44,15 @@ export default class WebSearchService implements TokenRingService {
   }
 
   async searchWeb(query: string, options: WebSearchProviderOptions | undefined, agent: Agent): Promise<WebSearchResult> {
-    return this.getActiveProvider(agent).searchWeb(query, options);
+    return this.requireActiveProvider(agent).searchWeb(query, options);
   }
 
   async searchNews(query: string, options: WebSearchProviderOptions | undefined, agent: Agent): Promise<NewsSearchResult> {
-    return this.getActiveProvider(agent).searchNews(query, options);
+    return this.requireActiveProvider(agent).searchNews(query, options);
   }
 
   async fetchPage(url: string, options: WebPageOptions | undefined, agent: Agent): Promise<WebPageResult> {
-    return this.getActiveProvider(agent).fetchPage(url, options);
+    return this.requireActiveProvider(agent).fetchPage(url, options);
   }
 
   async deepSearch(query: string, options: DeepSearchOptions | undefined, agent: Agent): Promise<DeepSearchResult> {

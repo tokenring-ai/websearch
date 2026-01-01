@@ -1,22 +1,12 @@
-import {Agent} from "@tokenring-ai/agent";
-import WebSearchService from "../../WebSearchService.js";
+import createSubcommandRouter from "@tokenring-ai/agent/util/subcommandRouter";
+import {get} from "./provider/get.ts";
+import {reset} from "./provider/reset.ts";
+import {select} from "./provider/select.ts";
+import {set} from "./provider/set.ts";
 
-export async function provider(remainder: string, agent: Agent): Promise<void> {
-  const webSearch = agent.requireServiceByType(WebSearchService);
-  const query = remainder.trim();
-  
-  if (query) {
-    const available = webSearch.getAvailableProviders();
-    if (available.includes(query)) {
-      webSearch.setActiveProvider(query, agent);
-      agent.infoLine(`Provider set to: ${query}`);
-    } else {
-      agent.errorLine(`Provider '${query}' not available. Available: ${available.join(", ")}`);
-    }
-  } else {
-    const active = webSearch.getActiveProvider(agent);
-    const available = webSearch.getAvailableProviders();
-    agent.infoLine(`Active provider: ${active || "none"}`);
-    agent.infoLine(`Available providers: ${available.join(", ")}`);
-  }
-}
+export default createSubcommandRouter({
+  get,
+  set,
+  select,
+  reset,
+})

@@ -3,7 +3,7 @@ import createSubcommandRouter from "@tokenring-ai/agent/util/subcommandRouter";
 import {deep} from "./websearch/deep.ts";
 import {fetch} from "./websearch/fetch.ts";
 import {news} from "./websearch/news.ts";
-import {provider} from "./websearch/provider.ts";
+import provider from "./websearch/provider.ts";
 import {search} from "./websearch/search.ts";
 
 const description = "/websearch - Web search operations";
@@ -52,15 +52,41 @@ Perform comprehensive search with content fetching
 **Example:**
 /websearch deep quantum computing --search 10 --fetch 3
 
-### provider [name]
+### provider get
 
-Manage search providers
-- Without name: Show active and available providers
-- With name: Set active provider (if available)
+Display the currently active web search provider
+- Shows which provider is currently selected
 
-**Examples:**
-/websearch provider
-/websearch provider tavily
+**Example:**
+/websearch provider get
+
+### provider set <name>
+
+Set a specific web search provider by name
+- Directly sets the active provider without interactive selection
+- Validates that the provider exists
+
+**Example:**
+/websearch provider set tavily
+
+### provider select
+
+Select an active web search provider interactively
+- Opens a selection interface to choose from available providers
+- Auto-selects if only one provider is configured
+- Shows current active provider in the list
+
+**Example:**
+/websearch provider select
+
+### provider reset
+
+Reset to the initial configured web search provider
+- Restores the provider from initial configuration
+- Useful for returning to default settings
+
+**Example:**
+/websearch provider reset
 
 ## OPTIONS
 
@@ -106,10 +132,16 @@ Manage search providers
 /websearch deep climate change --search 15 --news 3 --fetch 5 --language en --country uk
 
 # View Providers
-/websearch provider
+/websearch provider get
+
+# Select Provider Interactively
+/websearch provider select
 
 # Set Provider
-/websearch provider tavily
+/websearch provider set tavily
+
+# Reset Provider
+/websearch provider reset
 
 ## NOTES
 
