@@ -38,8 +38,8 @@ const description = "Perform a deep search: search the web, then fetch and retur
 
 const inputSchema = z.object({
   query: z.string().min(1).describe("A short search query to perform"),
-  searchCount: z.number().int().positive().describe("Number of general search results links to include. Should be set to 0 or a low number if the search is for news"),
-  newsCount: z.number().int().positive().describe("Number of news articles to search for"),
+  searchCount: z.number().int().positive().optional().describe("Number of general search results links to include. Should be set to 0 or a low number if the search is for news"),
+  newsCount: z.number().int().positive().optional().describe("Number of news articles to search for"),
   fetchCount: z.number().int().positive().optional().describe("Number of pages to fetch full page content for(default: 5)"),
   countryCode: z.string().optional().describe("Country code"),
   language: z.string().optional().describe("Language code"),
