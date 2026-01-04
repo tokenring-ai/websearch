@@ -26,7 +26,7 @@ export default class WebSearchService implements TokenRingService {
 
   constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {}
 
-  async attach(agent: Agent): Promise<void> {
+  attach(agent: Agent): void {
     const config = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice('websearch', WebSearchAgentConfigSchema));
     agent.initializeState(WebSearchState, config);
   }
