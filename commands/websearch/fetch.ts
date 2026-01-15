@@ -17,7 +17,7 @@ export async function fetch(remainder: string, agent: Agent): Promise<void> {
 
   const url = positionals.join(" ");
   if (!url) {
-    agent.errorLine("Usage: /websearch fetch <url> [flags]");
+    agent.errorMessage("Usage: /websearch fetch <url> [flags]");
     return;
   }
 
@@ -26,5 +26,5 @@ export async function fetch(remainder: string, agent: Agent): Promise<void> {
     countryCode: values.country as string,
   }, agent);
   
-  agent.infoLine(`Fetched ${result.markdown.length} characters`);
+  agent.infoMessage(`Fetched ${result.markdown.length} characters`);
 }

@@ -23,7 +23,7 @@ async function execute(
     throw new Error(`[${name}] query is required`);
   }
 
-  agent.infoLine(`[${name}] Searching: ${query}`);
+  agent.infoMessage(`[${name}] Searching: ${query}`);
   return await webSearch.searchWeb(query, {
     countryCode,
     language,

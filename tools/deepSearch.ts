@@ -23,7 +23,7 @@ async function execute(
     throw new Error(`[${name}] query is required`);
   }
 
-  agent.infoLine(`[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`);
+  agent.infoMessage(`[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`);
   return await webSearch.deepSearch(query, {
     searchCount,
     newsCount,

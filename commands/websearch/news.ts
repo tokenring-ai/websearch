@@ -20,7 +20,7 @@ export async function news(remainder: string, agent: Agent): Promise<void> {
 
   const query = positionals.join(" ");
   if (!query) {
-    agent.errorLine("Usage: /websearch news <query> [flags]");
+    agent.errorMessage("Usage: /websearch news <query> [flags]");
     return;
   }
 
@@ -32,5 +32,5 @@ export async function news(remainder: string, agent: Agent): Promise<void> {
     page: values.page ? Number(values.page) : undefined,
   }, agent);
   
-  agent.infoLine(`News results: ${JSON.stringify(result).slice(0, 500)}...`);
+  agent.infoMessage(`News results: ${JSON.stringify(result).slice(0, 500)}...`);
 }

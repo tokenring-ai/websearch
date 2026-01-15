@@ -526,7 +526,7 @@ const searchResults = await searchWeb.execute(
   { query: 'latest AI news', num: 3 },
   agent
 );
-agent.chat.infoLine(`Found ${searchResults.organic.length} results`);
+agent.chat.infoMessage(`Found ${searchResults.organic.length} results`);
 ```
 
 ### 3. Deep Search Example

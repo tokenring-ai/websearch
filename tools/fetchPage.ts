@@ -20,7 +20,7 @@ async function execute(
     throw new Error(`[${name}] url is required`);
   }
 
-  agent.infoLine(`[${name}] Fetching: ${url}`);
+  agent.infoMessage(`[${name}] Fetching: ${url}`);
   const result = await webSearch.fetchPage(url, {
     render,
     countryCode

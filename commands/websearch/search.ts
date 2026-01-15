@@ -20,7 +20,7 @@ export async function search(remainder: string, agent: Agent): Promise<void> {
 
   const query = positionals.join(" ");
   if (!query) {
-    agent.errorLine("Usage: /websearch search <query> [flags]");
+    agent.errorMessage("Usage: /websearch search <query> [flags]");
     return;
   }
 
@@ -32,5 +32,5 @@ export async function search(remainder: string, agent: Agent): Promise<void> {
     page: values.page ? Number(values.page) : undefined,
   }, agent);
   
-  agent.infoLine(`Search results: ${JSON.stringify(result).slice(0, 500)}...`);
+  agent.infoMessage(`Search results: ${JSON.stringify(result).slice(0, 500)}...`);
 }

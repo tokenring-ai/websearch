@@ -24,7 +24,7 @@ async function execute(
     throw new Error(`[${name}] query is required`);
   }
 
-  agent.infoLine(`[${name}] Searching news: ${query}`);
+  agent.infoMessage(`[${name}] Searching news: ${query}`);
   return await webSearch.searchNews(query, {
     countryCode,
     language,

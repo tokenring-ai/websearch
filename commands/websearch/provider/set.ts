@@ -6,15 +6,15 @@ export async function set(remainder: string, agent: Agent): Promise<void> {
   const providerName = remainder.trim();
 
   if (!providerName) {
-    agent.errorLine("Usage: /websearch provider set <name>");
+    agent.errorMessage("Usage: /websearch provider set <name>");
     return;
   }
 
   const available = webSearch.getAvailableProviders();
   if (available.includes(providerName)) {
     webSearch.setActiveProvider(providerName, agent);
-    agent.infoLine(`Provider set to: ${providerName}`);
+    agent.infoMessage(`Provider set to: ${providerName}`);
   } else {
-    agent.infoLine(`Provider "${providerName}" not found. Available providers: ${available.join(", ")}`);
+    agent.infoMessage(`Provider "${providerName}" not found. Available providers: ${available.join(", ")}`);
   }
 }
