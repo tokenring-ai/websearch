@@ -1,6 +1,6 @@
 import {Agent} from "@tokenring-ai/agent";
-import WebSearchService from "../../../WebSearchService.ts";
 import {WebSearchState} from "../../../state/webSearchState.ts";
+import WebSearchService from "../../../WebSearchService.ts";
 
 export async function reset(_remainder: string, agent: Agent): Promise<void> {
   const webSearch = agent.requireServiceByType(WebSearchService);

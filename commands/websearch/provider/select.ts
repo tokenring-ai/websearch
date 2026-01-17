@@ -1,6 +1,7 @@
 import {Agent} from "@tokenring-ai/agent";
-import WebSearchService from "../../../WebSearchService.ts";
+import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {WebSearchState} from "../../../state/webSearchState.ts";
+import WebSearchService from "../../../WebSearchService.ts";
 
 export async function select(_remainder: string, agent: Agent): Promise<void> {
   const webSearch = agent.requireServiceByType(WebSearchService);
@@ -18,21 +19,28 @@ export async function select(_remainder: string, agent: Agent): Promise<void> {
   }
 
   const activeProvider = agent.getState(WebSearchState).provider;
-  const formattedProviders = available.map(name => ({
+  const formattedProviders: TreeLeaf[] = available.map(name => ({
     name: `${name}${name === activeProvider ? " (current)" : ""}`,
     value: name,
   }));
 
-  const selectedValue = await agent.askHuman({
-    type: "askForSingleTreeSelection",
-    title: "Web Search Provider Selection",
+  const selection = await agent.askQuestion({
     message: "Select an active web search provider",
-    tree: {name: "Available Providers", children: formattedProviders}
+    question: {
+      type: 'treeSelect',
+      label: "Web Search Provider",
+      key: "result",
+      defaultValue: activeProvider ? [activeProvider] : undefined,
+      minimumSelections: 1,
+      maximumSelections: 1,
+      tree: formattedProviders
+    }
   });
 
-  if (selectedValue) {
-    webSearch.setActiveProvider(selectedValue, agent);
-    agent.infoMessage(`Active provider set to: ${selectedValue}`);
+  if (selection) {
+    const result = selection[0]
+    webSearch.setActiveProvider(result, agent);
+    agent.infoMessage(`Active provider set to: ${result}`);
   } else {
     agent.infoMessage("Provider selection cancelled.");
   }

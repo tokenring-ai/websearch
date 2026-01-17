@@ -1,7 +1,7 @@
-import searchWeb from "./tools/searchWeb.ts";
-import searchNews from "./tools/searchNews.ts";
-import fetchPage from "./tools/fetchPage.ts";
 import deepSearch from "./tools/deepSearch.ts";
+import fetchPage from "./tools/fetchPage.ts";
+import searchNews from "./tools/searchNews.ts";
+import searchWeb from "./tools/searchWeb.ts";
 
 export default {   searchWeb,
   searchNews,
