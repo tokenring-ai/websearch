@@ -4,8 +4,13 @@ import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
 import {WebSearchAgentConfigSchema} from "../schema.ts";
 
-export class WebSearchState implements AgentStateSlice {
+const serializationSchema = z.object({
+  provider: z.string().nullable()
+});
+
+export class WebSearchState implements AgentStateSlice<typeof serializationSchema> {
   name = "WebSearchState";
+  serializationSchema = serializationSchema;
   provider: string | null;
 
   constructor(readonly initialConfig: z.output<typeof WebSearchAgentConfigSchema>) {
@@ -18,11 +23,11 @@ export class WebSearchState implements AgentStateSlice {
 
   reset(what: ResetWhat[]): void {}
 
-  serialize(): object {
+  serialize(): z.output<typeof serializationSchema> {
     return { provider: this.provider };
   }
 
-  deserialize(data: any): void {
+  deserialize(data: z.output<typeof serializationSchema>): void {
     this.provider = data.provider;
   }
 
