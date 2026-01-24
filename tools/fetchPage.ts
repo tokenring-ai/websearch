@@ -4,6 +4,7 @@ import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
 const name = "websearch_fetchPage";
+const displayName = "Websearch/fetchPage";
 
 async function execute(
   {
@@ -37,5 +38,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

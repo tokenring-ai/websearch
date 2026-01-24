@@ -5,6 +5,7 @@ import {NewsSearchResult} from "../WebSearchProvider.ts";
 import WebSearchService from "../WebSearchService.js";
 
 const name = "websearch_searchNews";
+const displayName = "Websearch/searchNews";
 
 async function execute(
   {
@@ -46,5 +47,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;
