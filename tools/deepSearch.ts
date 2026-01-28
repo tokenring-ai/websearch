@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.js";
 
@@ -15,24 +15,23 @@ async function execute(
     countryCode,
     language,
     location,
-  }: z.infer<typeof inputSchema>,
+  }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<{ results: any[], news: any[], pages: Array<{ url: string; markdown: string }> }> {
+): Promise<TokenRingToolJSONResult<{ results: any[], news: any[], pages: Array<{ url: string; markdown: string }> }>> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
-  if (!query) {
-    throw new Error(`[${name}] query is required`);
-  }
-
   agent.infoMessage(`[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`);
-  return await webSearch.deepSearch(query, {
-    searchCount,
-    newsCount,
-    fetchCount,
-    countryCode,
-    language,
-    location,
-  }, agent);
+  return {
+    type: "json",
+    data: await webSearch.deepSearch(query, {
+      searchCount,
+      newsCount,
+      fetchCount,
+      countryCode,
+      language,
+      location,
+    }, agent)
+  };
 }
 
 const description = "Perform a deep search: search the web, then fetch and return full page content for top results";
