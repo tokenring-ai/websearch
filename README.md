@@ -55,66 +55,98 @@ const WebSearchAgentConfigSchema = z.object({
 }).default({});
 ```
 
-## Usage
+## Chat Commands
 
-### Basic Plugin Setup
+The websearch plugin provides comprehensive chat commands for interactive web search operations:
 
-```typescript
-import { TokenRingApp } from '@tokenring-ai/app';
-import websearch from '@tokenring-ai/websearch';
-import { WebSearchService } from '@tokenring-ai/websearch';
+### `/websearch search <query>`
 
-const app = new TokenRingApp({
-  config: {
-    websearch: {
-      providers: {
-        serper: {
-          type: 'SerperWebSearchProvider'
-        }
-      },
-      agentDefaults: {
-        provider: 'serper'
-      }
-    }
-  }
-});
+Perform a general web search.
 
-app.registerPlugin(websearch);
-await app.start();
-
-// Access the service
-const agent = app.agent;
-const webSearchService = app.requireServiceByType(WebSearchService);
-const results = await webSearchService.searchWeb('Token Ring AI framework', undefined, agent);
-console.log(results);
+```bash
+/websearch search machine learning basics
 ```
 
-### Using Web Search in Agents
+**Options:**
+- `--country <code>` - Country code for localized results (e.g., 'us', 'uk', 'de')
+- `--language <code>` - Language code for content (e.g., 'en', 'es', 'fr')
+- `--location <name>` - Location name for geo-targeted results
+- `--num <n>` - Number of results to return
+- `--page <n>` - Page number for pagination
 
-```typescript
-import { WebSearchService } from '@tokenring-ai/websearch';
+### `/websearch news <query>`
 
-const webSearchService = agent.requireServiceByType(WebSearchService);
+Search for news articles.
 
-// Basic web search
-const results = await webSearchService.searchWeb('machine learning trends', undefined, agent);
+```bash
+/websearch news artificial intelligence
+```
 
-// News search
-const newsResults = await webSearchService.searchNews('artificial intelligence', undefined, agent);
+**Options:**
+- `--country <code>` - Country code for localized results
+- `--language <code>` - Language code for content
+- `--location <name>` - Location name for geo-targeted results
+- `--num <n>` - Number of results to return
+- `--page <n>` - Page number for pagination
 
-// Fetch web page content
-const page = await webSearchService.fetchPage('https://example.com', undefined, agent);
+### `/websearch fetch <url>`
 
-// Deep search with comprehensive results
-const deepResults = await webSearchService.deepSearch(
-  'quantum computing recent developments',
-  {
-    searchCount: 10,
-    newsCount: 5,
-    fetchCount: 3
-  },
-  agent
-);
+Fetch and extract content from a specific web page.
+
+```bash
+/websearch fetch https://example.com
+```
+
+**Options:**
+- `--country <code>` - Country code for localized results
+- `--render` - Enable JavaScript rendering for dynamic content
+
+### `/websearch deep <query>`
+
+Perform comprehensive search with content fetching.
+
+```bash
+/websearch deep quantum computing --search 10 --news 5 --fetch 3
+```
+
+**Options:**
+- `--search <n>` - Number of web search results (default: 10)
+- `--news <n>` - Number of news results (default: 0)
+- `--fetch <n>` - Number of pages to fetch (default: 5)
+- `--country <code>` - Country code for localized results
+- `--language <code>` - Language code for content
+- `--location <name>` - Location name for geo-targeted results
+
+### `/websearch provider get`
+
+Display the currently active web search provider.
+
+```bash
+/websearch provider get
+```
+
+### `/websearch provider set <name>`
+
+Set a specific web search provider by name.
+
+```bash
+/websearch provider set tavily
+```
+
+### `/websearch provider select`
+
+Select an active web search provider interactively.
+
+```bash
+/websearch provider select
+```
+
+### `/websearch provider reset`
+
+Reset to the initial configured web search provider.
+
+```bash
+/websearch provider reset
 ```
 
 ## Tools
@@ -467,6 +499,18 @@ This package works with concrete provider implementations in the Token Ring ecos
 
 Providers register themselves with the websearch service during plugin initialization.
 
+### Chat Command Integration
+
+The plugin automatically registers comprehensive chat commands through the agent command system:
+
+- `/websearch search <query>` - General web search with location options
+- `/websearch news <query>` - News-focused search
+- `/websearch fetch <url>` - Page content fetching
+- `/websearch deep <query>` - Comprehensive search with content fetching
+- `/websearch provider get/set/select/reset` - Provider management commands
+
+Commands support interactive provider selection with tree-based UI and help documentation.
+
 ## Scripting Functions
 
 The websearch plugin automatically registers four global scripting functions when the scripting service is available:
@@ -474,7 +518,7 @@ The websearch plugin automatically registers four global scripting functions whe
 - `searchWeb(query: string)`: Performs a web search and returns JSON results
 - `searchNews(query: string)`: Performs a news search and returns JSON results
 - `fetchPage(url: string)`: Fetches page markdown content
-- `deepSearch(query: string, searchCount?: number, newsCount?: number, fetchCount?: number)`: Performs comprehensive deep search and returns JSON results
+- `deepSearch(query: string, searchCount?, newsCount?, fetchCount?)`: Performs comprehensive deep search and returns JSON results
 
 These functions are accessible through the LLM via the scripting interface.
 
@@ -497,8 +541,18 @@ pkg/websearch/
 │   ├── fetchPage.ts        # Page fetch tool
 │   └── deepSearch.ts       # Deep search tool
 ├── commands/               # Chat command implementations
-│   └── websearch.ts        # Main command router
-├── state/
+│   ├── websearch.ts        # Main command router
+│   ├── search.ts           # /websearch search <query>
+│   ├── news.ts             # /websearch news <query>
+│   ├── fetch.ts            # /websearch fetch <url>
+│   ├── deep.ts             # /websearch deep <query>
+│   └── provider/           # Provider management commands
+│       ├── provider.ts     # Provider command router
+│       ├── get.ts          # Get current provider
+│       ├── set.ts          # Set provider by name
+│       ├── select.ts       # Interactive provider selection
+│       └── reset.ts        # Reset to initial provider
+├── state/                  # Agent state management
 │   └── webSearchState.ts   # Agent state slice
 └── package.json            # Package metadata and dependencies
 ```
@@ -526,6 +580,8 @@ bun build
 - Consider implementing caching for frequently accessed content
 - Respect robots.txt and terms of service for all search operations
 - Test with different provider implementations to ensure consistency
+- Use the interactive provider selection command for better user experience
+- Leverage deep search for comprehensive research tasks
 
 ### Limitations
 
@@ -535,6 +591,7 @@ bun build
 - No built-in result deduplication or similarity filtering
 - Binary/non-text content not supported in page fetch operations
 - Requires concrete provider implementations for actual functionality
+- Country and language options depend on provider support
 
 ## Examples
 
@@ -593,6 +650,29 @@ class CustomSearchProvider extends WebSearchProvider {
     // Return markdown content and optional metadata
   }
 }
+```
+
+### Example 3: Using Chat Commands
+
+```typescript
+// In an agent or application, you can use the chat commands directly:
+
+// Search for information
+/websearch search typescript best practices
+
+// Get latest news
+/websearch news ai developments
+
+// Fetch page content
+/websearch fetch https://developer.mozilla.org/en-US/docs/Web/JavaScript
+
+// Deep search for research
+/websearch deep machine learning fundamentals --search 15 --news 5 --fetch 5
+
+// Manage providers
+/websearch provider get
+/websearch provider set tavily
+/websearch provider select
 ```
 
 ## License
