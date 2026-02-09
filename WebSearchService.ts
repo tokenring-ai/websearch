@@ -16,7 +16,7 @@ import WebSearchProvider, {
 } from "./WebSearchProvider.js";
 
 export default class WebSearchService implements TokenRingService {
-  name = "WebSearchService";
+  readonly name = "WebSearchService";
   description = "Service for Web Search";
 
   private providerRegistry = new KeyedRegistry<WebSearchProvider>();

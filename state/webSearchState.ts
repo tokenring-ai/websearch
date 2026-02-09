@@ -1,5 +1,4 @@
 import {Agent} from "@tokenring-ai/agent";
-import type {ResetWhat} from "@tokenring-ai/agent/AgentEvents";
 import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
 import {WebSearchAgentConfigSchema} from "../schema.ts";
@@ -9,7 +8,7 @@ const serializationSchema = z.object({
 });
 
 export class WebSearchState implements AgentStateSlice<typeof serializationSchema> {
-  name = "WebSearchState";
+  readonly name = "WebSearchState";
   serializationSchema = serializationSchema;
   provider: string | null;
 
@@ -20,8 +19,6 @@ export class WebSearchState implements AgentStateSlice<typeof serializationSchem
   transferStateFromParent(parent: Agent): void {
     this.provider = parent.getState(WebSearchState).provider;
   }
-
-  reset(what: ResetWhat[]): void {}
 
   serialize(): z.output<typeof serializationSchema> {
     return { provider: this.provider };
