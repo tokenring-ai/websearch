@@ -238,9 +238,9 @@ Perform a comprehensive deep search that combines web search, news search, and p
 ```typescript
 z.object({
   query: z.string().min(1).describe("A short search query to perform"),
-  searchCount: z.number().int().positive().optional().describe("Number of general search results links to include."),
+  searchCount: z.number().int().positive().optional().describe("Number of general search results links to include. Should be set to 0 or a low number if the search is for news"),
   newsCount: z.number().int().positive().optional().describe("Number of news articles to search for"),
-  fetchCount: z.number().int().positive().optional().describe("Number of pages to fetch full page content for (default: 5)."),
+  fetchCount: z.number().int().positive().optional().describe("Number of pages to fetch full page content for(default: 5)"),
   countryCode: z.string().optional().describe("Country code"),
   language: z.string().optional().describe("Language code"),
   location: z.string().optional().describe("Location string"),
@@ -384,8 +384,8 @@ interface WebPageResult {
 **DeepSearchResult:**
 ```typescript
 interface DeepSearchResult {
-  results: OrganicResult[];      // Web search results
-  news: NewsItem[];              // News search results
+  results: any[];
+  news: NewsItem[];
   pages: Array<{                 // Fetched page content
     url: string;
     markdown: string;
@@ -511,9 +511,9 @@ The plugin automatically registers comprehensive chat commands through the agent
 
 Commands support interactive provider selection with tree-based UI and help documentation.
 
-## Scripting Functions
+### Scripting Functions
 
-The websearch plugin automatically registers four global scripting functions when the scripting service is available:
+The plugin automatically registers four global scripting functions when the scripting service is available:
 
 - `searchWeb(query: string)`: Performs a web search and returns JSON results
 - `searchNews(query: string)`: Performs a news search and returns JSON results
