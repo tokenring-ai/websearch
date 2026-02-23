@@ -1,8 +1,9 @@
 import {Agent} from "@tokenring-ai/agent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {parseArgs} from "node:util";
 import WebSearchService from "../../WebSearchService.js";
 
-export async function fetch(remainder: string, agent: Agent): Promise<void> {
+export async function fetch(remainder: string, agent: Agent): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
   
   const {values, positionals} = parseArgs({
@@ -17,8 +18,7 @@ export async function fetch(remainder: string, agent: Agent): Promise<void> {
 
   const url = positionals.join(" ");
   if (!url) {
-    agent.errorMessage("Usage: /websearch fetch <url> [flags]");
-    return;
+    throw new CommandFailedError("Usage: /websearch fetch <url> [flags]");
   }
 
   const result = await webSearch.fetchPage(url, {
@@ -26,5 +26,5 @@ export async function fetch(remainder: string, agent: Agent): Promise<void> {
     countryCode: values.country as string,
   }, agent);
   
-  agent.infoMessage(`Fetched ${result.markdown.length} characters`);
+  return `Fetched ${result.markdown.length} characters`;
 }

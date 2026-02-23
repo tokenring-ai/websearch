@@ -1,9 +1,9 @@
 import {Agent} from "@tokenring-ai/agent";
-import indent from "@tokenring-ai/utility/string/indent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {parseArgs} from "node:util";
 import WebSearchService from "../../WebSearchService.js";
 
-export async function deep(remainder: string, agent: Agent): Promise<void> {
+export async function deep(remainder: string, agent: Agent): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   const {values, positionals} = parseArgs({
@@ -22,8 +22,7 @@ export async function deep(remainder: string, agent: Agent): Promise<void> {
 
   const query = positionals.join(" ");
   if (!query) {
-    agent.errorMessage("Usage: /websearch deep <query> [flags]");
-    return;
+    throw new CommandFailedError("Usage: /websearch deep <query> [flags]");
   }
 
   const searchOptions = {
@@ -67,6 +66,5 @@ ${resultsList || 'No results found'}
     `
   });
 
-  `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`;
-  result.pages.forEach((p, i) => agent.infoMessage(indent(`[${i + 1}] ${p.url} (${p.markdown.length} chars)`, 1)));
+  return `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`;
 }

@@ -1,8 +1,9 @@
 import {Agent} from "@tokenring-ai/agent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {parseArgs} from "node:util";
 import WebSearchService from "../../WebSearchService.js";
 
-export async function news(remainder: string, agent: Agent): Promise<void> {
+export async function news(remainder: string, agent: Agent): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
   
   const {values, positionals} = parseArgs({
@@ -20,8 +21,7 @@ export async function news(remainder: string, agent: Agent): Promise<void> {
 
   const query = positionals.join(" ");
   if (!query) {
-    agent.errorMessage("Usage: /websearch news <query> [flags]");
-    return;
+    throw new CommandFailedError("Usage: /websearch news <query> [flags]");
   }
 
   const result = await webSearch.searchNews(query, {
@@ -32,5 +32,5 @@ export async function news(remainder: string, agent: Agent): Promise<void> {
     page: values.page ? Number(values.page) : undefined,
   }, agent);
   
-  agent.infoMessage(`News results: ${JSON.stringify(result).slice(0, 500)}...`);
+  return `News results: ${JSON.stringify(result).slice(0, 500)}...`;
 }
