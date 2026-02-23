@@ -3,19 +3,17 @@ import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {WebSearchState} from "../../../state/webSearchState.ts";
 import WebSearchService from "../../../WebSearchService.ts";
 
-export async function select(_remainder: string, agent: Agent): Promise<void> {
+export async function select(_remainder: string, agent: Agent): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
   const available = webSearch.getAvailableProviders();
 
   if (available.length === 0) {
-    agent.infoMessage("No web search providers are registered.");
-    return;
+    return "No web search providers are registered.";
   }
 
   if (available.length === 1) {
     webSearch.setActiveProvider(available[0], agent);
-    agent.infoMessage(`Only one provider configured, auto-selecting: ${available[0]}`);
-    return;
+    return `Only one provider configured, auto-selecting: ${available[0]}`;
   }
 
   const activeProvider = agent.getState(WebSearchState).provider;
@@ -40,8 +38,8 @@ export async function select(_remainder: string, agent: Agent): Promise<void> {
   if (selection) {
     const result = selection[0]
     webSearch.setActiveProvider(result, agent);
-    agent.infoMessage(`Active provider set to: ${result}`);
+    return `Active provider set to: ${result}`;
   } else {
-    agent.infoMessage("Provider selection cancelled.");
+    return "Provider selection cancelled.";
   }
 }
