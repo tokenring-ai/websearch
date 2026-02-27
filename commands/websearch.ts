@@ -162,6 +162,7 @@ const execute = createSubcommandRouter({
 });
 
 export default {
+  name: "websearch",
   description,
   execute,
   help,

@@ -4,7 +4,7 @@ import {ChatService} from "@tokenring-ai/chat";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
 import {z} from "zod";
-import chatCommands from "./chatCommands.ts";
+import agentCommands from "./commands.ts";
 import {WebSearchConfigSchema} from "./index.ts";
 import packageJSON from './package.json' with {type: 'json'};
 import tools from "./tools.ts";
@@ -70,7 +70,7 @@ export default {
       chatService.addTools(tools)
     );
     app.waitForService(AgentCommandService, agentCommandService =>
-      agentCommandService.addAgentCommands(chatCommands)
+      agentCommandService.addAgentCommands(agentCommands)
     );
   },
 
