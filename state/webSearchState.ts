@@ -1,5 +1,5 @@
 import {Agent} from "@tokenring-ai/agent";
-import type {AgentStateSlice} from "@tokenring-ai/agent/types";
+import {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
 import {WebSearchAgentConfigSchema} from "../schema.ts";
 
@@ -7,12 +7,11 @@ const serializationSchema = z.object({
   provider: z.string().nullable()
 });
 
-export class WebSearchState implements AgentStateSlice<typeof serializationSchema> {
-  readonly name = "WebSearchState";
-  serializationSchema = serializationSchema;
+export class WebSearchState extends AgentStateSlice<typeof serializationSchema> {
   provider: string | null;
 
   constructor(readonly initialConfig: z.output<typeof WebSearchAgentConfigSchema>) {
+    super("WebSearchState", serializationSchema);
     this.provider = initialConfig.provider ?? null;
   }
 

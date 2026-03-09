@@ -32,26 +32,33 @@ bun install @tokenring-ai/websearch
 
 The `WebSearchService` class implements the `TokenRingService` interface and serves as the central hub for all web search operations. It manages multiple provider registrations through a registry and maintains state within agents.
 
+**Service Name**: `"WebSearchService"`
+
 **Constructor:**
 ```typescript
 constructor(readonly options: z.output<typeof WebSearchConfigSchema>)
 ```
 
 **Provider Management:**
-- `registerProvider(provider: WebSearchProvider, name: string): void`
+- `registerProvider = this.providerRegistry.register`
   - Registers a provider with the service registry
+  - Signature: `(provider: WebSearchProvider, name: string) => void`
 
-- `getAvailableProviders(): string[]`
+- `getAvailableProviders = this.providerRegistry.getAllItemNames`
   - Returns an array of all registered provider names
+  - Signature: `() => string[]`
 
 - `setActiveProvider(name: string, agent: Agent): void`
   - Sets the active provider for the given agent
 
 - `requireActiveProvider(agent: Agent): WebSearchProvider`
   - Returns the currently active provider for the agent (throws error if none is set)
+  - Throws `Error` if no provider is set
 
+**Agent Attachment:**
 - `attach(agent: Agent): void`
   - Initializes the agent's web search state with the configured provider
+  - Merges global defaults with agent-specific configuration
 
 **Search Operations:**
 
@@ -61,7 +68,7 @@ constructor(readonly options: z.output<typeof WebSearchConfigSchema>)
 
 - `async searchNews(query: string, options?: WebSearchProviderOptions, agent: Agent): Promise<NewsSearchResult>`
   - Performs a news-focused search using the active provider
-  - Returns an array of news articles
+  - Returns an object containing an array of news articles
 
 - `async fetchPage(url: string, options?: WebPageOptions, agent: Agent): Promise<WebPageResult>`
   - Fetches the content of a URL
@@ -70,6 +77,7 @@ constructor(readonly options: z.output<typeof WebSearchConfigSchema>)
 - `async deepSearch(query: string, options?: DeepSearchOptions, agent: Agent): Promise<DeepSearchResult>`
   - Performs a comprehensive search combining web, news, and page fetching
   - Returns combined results with fetched page content
+  - Default options: `searchCount: 10`, `newsCount: 0`, `fetchCount: 5`
 
 ### WebSearchProvider (Abstract Class)
 
@@ -83,7 +91,7 @@ This abstract base class defines the interface that all concrete search provider
 
 - `abstract searchNews(query: string, options?: WebSearchProviderOptions): Promise<NewsSearchResult>`
   - Performs a news-focused search
-  - Must return an array of news articles with titles, links, dates, and sources
+  - Must return an object with a `news` array containing news articles
 
 - `abstract fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>`
   - Fetches the content of a URL
@@ -118,6 +126,11 @@ z.object({
 })
 ```
 
+**Execution:**
+- Requires `WebSearchService` from agent
+- Calls `searchWeb` with provided options
+- Returns `TokenRingToolJSONResult<WebSearchResult>`
+
 #### websearch_searchNews
 
 Search for news articles using the active web search provider.
@@ -143,6 +156,11 @@ z.object({
 })
 ```
 
+**Execution:**
+- Requires `WebSearchService` from agent
+- Calls `searchNews` with provided options
+- Returns `TokenRingToolJSONResult<NewsSearchResult>`
+
 #### websearch_fetchPage
 
 Fetch the content of a web page using the active web search provider.
@@ -164,6 +182,11 @@ z.object({
   countryCode: z.string().optional().describe("Country code"),
 })
 ```
+
+**Execution:**
+- Requires `WebSearchService` from agent
+- Calls `fetchPage` with provided options
+- Returns `TokenRingToolJSONResult<{ markdown: string, metadata?: Record<string, any> }>`
 
 #### websearch_deepSearch
 
@@ -191,6 +214,12 @@ z.object({
 })
 ```
 
+**Execution:**
+- Requires `WebSearchService` from agent
+- Performs parallel web and news searches
+- Fetches content from top results
+- Returns combined results
+
 ### Chat Commands
 
 The websearch plugin provides comprehensive chat commands for interactive web search operations:
@@ -199,8 +228,9 @@ The websearch plugin provides comprehensive chat commands for interactive web se
 
 Perform a general web search.
 
+**Usage:**
 ```bash
-/websearch search machine learning basics
+/websearch search <query> [options]
 ```
 
 **Options:**
@@ -210,18 +240,21 @@ Perform a general web search.
 - `--num <n>` - Number of results to return
 - `--page <n>` - Page number for pagination
 
-**Example:**
-```
+**Examples:**
+```bash
 /websearch search typescript tutorial
 /websearch search restaurants --location 'New York' --country us
 ```
+
+**Output:** Returns first 500 characters of search results as JSON
 
 #### /websearch news <query>
 
 Search for news articles.
 
+**Usage:**
 ```bash
-/websearch news artificial intelligence
+/websearch news <query> [options]
 ```
 
 **Options:**
@@ -231,36 +264,42 @@ Search for news articles.
 - `--num <n>` - Number of results to return
 - `--page <n>` - Page number for pagination
 
-**Example:**
-```
+**Examples:**
+```bash
 /websearch news artificial intelligence
 /websearch news cryptocurrency --num 5
 ```
+
+**Output:** Returns first 500 characters of news results as JSON
 
 #### /websearch fetch <url>
 
 Fetch and extract content from a specific web page.
 
+**Usage:**
 ```bash
-/websearch fetch https://example.com
+/websearch fetch <url> [options]
 ```
 
 **Options:**
 - `--country <code>` - Country code for localized results
 - `--render` - Enable JavaScript rendering for dynamic content
 
-**Example:**
-```
+**Examples:**
+```bash
 /websearch fetch https://example.com
 /websearch fetch https://example.com --render
 ```
+
+**Output:** Returns the number of characters fetched
 
 #### /websearch deep <query>
 
 Perform comprehensive search with content fetching.
 
+**Usage:**
 ```bash
-/websearch deep quantum computing --search 10 --news 5 --fetch 3
+/websearch deep <query> [options]
 ```
 
 **Options:**
@@ -271,66 +310,115 @@ Perform comprehensive search with content fetching.
 - `--language <code>` - Language code for content
 - `--location <name>` - Location name for geo-targeted results
 
-**Example:**
-```
+**Examples:**
+```bash
 /websearch deep quantum computing
 /websearch deep artificial intelligence --search 20 --news 5 --fetch 10
 ```
+
+**Output:** Creates an artifact with formatted markdown results including:
+- Web results with titles, URLs, and snippets
+- News results with titles, links, and snippets
+- Fetched pages with URLs and character counts
 
 #### /websearch provider get
 
 Display the currently active web search provider.
 
+**Usage:**
 ```bash
 /websearch provider get
+```
+
+**Example:**
+```bash
+/websearch provider get
+# Output: Current provider: tavily (or "(none)" if not set)
 ```
 
 #### /websearch provider set <name>
 
 Set a specific web search provider by name.
 
+**Usage:**
+```bash
+/websearch provider set <name>
+```
+
+**Example:**
 ```bash
 /websearch provider set tavily
+# Output: Provider set to: tavily
 ```
+
+**Error Handling:**
+- Throws `CommandFailedError` if provider name is empty
+- Returns error message if provider not found, lists available providers
 
 #### /websearch provider select
 
 Select an active web search provider interactively. Auto-selects if only one provider is configured.
 
+**Usage:**
 ```bash
 /websearch provider select
+```
+
+**Behavior:**
+- If no providers registered: Returns "No web search providers are registered."
+- If one provider: Auto-selects and returns confirmation
+- If multiple providers: Shows interactive tree selection with current provider marked
+
+**Example:**
+```bash
+/websearch provider select
+# Output: Active provider set to: <selected-provider>
+# Or: Provider selection cancelled.
 ```
 
 #### /websearch provider reset
 
 Reset to the initial configured web search provider.
 
+**Usage:**
 ```bash
 /websearch provider reset
 ```
+
+**Example:**
+```bash
+/websearch provider reset
+# Output: Provider reset to <initial-provider>
+```
+
+**Error Handling:**
+- Throws `CommandFailedError` if no initial provider is configured
 
 ### Configuration
 
 The websearch plugin requires configuration to enable provider implementations. Configuration is loaded from the application's configuration system using the `WebSearchConfigSchema`:
 
+**Schema Definition:**
 ```typescript
 import { WebSearchConfigSchema } from '@tokenring-ai/websearch';
 
+// Configuration structure
 const config = {
   websearch: {
     providers: {
-      "your-provider-name": {
-        type: "YourProviderImplementation"
+      "provider-name": {
+        type: "ProviderImplementationClass"
+        // Additional provider-specific options
       }
     },
     agentDefaults: {
-      provider: "your-provider-name"
+      provider: "default-provider-name"
     }
   }
 };
 ```
 
-### Agent Configuration
+**Agent Configuration:**
 
 Individual agents can override the default provider configuration:
 
@@ -354,20 +442,14 @@ const WebSearchAgentConfigSchema = z.object({
 
 Each agent maintains a web search state slice (`WebSearchState`) that tracks the active provider:
 
-```typescript
-// Get current active provider
-const state = agent.getState(WebSearchState);
-console.log('Active provider:', state.provider);
-
-// Switch providers
-webSearchService.setActiveProvider('serper', agent);
-```
-
-**WebSearchState Structure:**
+**State Structure:**
 ```typescript
 class WebSearchState implements AgentStateSlice<typeof serializationSchema> {
   readonly name = "WebSearchState";
   provider: string | null;
+  
+  // Constructor accepts initial config
+  constructor(initialConfig: z.output<typeof WebSearchAgentConfigSchema>)
   
   // State serialization/deserialization for persistence
   serialize(): { provider: string | null }
@@ -379,6 +461,19 @@ class WebSearchState implements AgentStateSlice<typeof serializationSchema> {
   // Display state in UI
   show(): string[]
 }
+```
+
+**Usage:**
+```typescript
+// Get current active provider
+const state = agent.getState(WebSearchState);
+console.log('Active provider:', state.provider);
+
+// Switch providers
+webSearchService.setActiveProvider('serper', agent);
+
+// Check initial config
+console.log('Initial provider:', state.initialConfig.provider);
 ```
 
 ### Result Types
@@ -414,7 +509,7 @@ interface NewsItem {
 #### WebPageResult
 
 ```typescript
-interface WebPageResult {
+type WebPageResult = {
   markdown: string;
   metadata?: Record<string, string>;
 }
@@ -535,13 +630,14 @@ const webSearchService = agent.requireServiceByType(WebSearchService);
 const results = await webSearchService.searchWeb('latest AI research', undefined, agent);
 ```
 
-### Composite Provider Usage
+### Deep Search with Custom Reranking
 
 The `deepSearch` method supports custom result reranking through the optional `rerank` parameter:
 
 ```typescript
 const sortedResults = await webSearchService.deepSearch('machine learning', {
   searchCount: 20,
+  newsCount: 5,
   fetchCount: 5,
   rerank: async (results) => {
     // Implement custom sorting logic
@@ -563,10 +659,10 @@ Providers register themselves with the websearch service during plugin initializ
 
 The plugin automatically registers four global scripting functions when the scripting service is available:
 
-- `searchWeb(query: string)`: Performs a web search and returns JSON results
-- `searchNews(query: string)`: Performs a news search and returns JSON results
-- `fetchPage(url: string)`: Fetches page markdown content
-- `deepSearch(query: string, searchCount?, newsCount?, fetchCount?)`: Performs comprehensive deep search and returns JSON results
+- `searchWeb(query: string)`: Performs a web search and returns JSON results as string
+- `searchNews(query: string)`: Performs a news search and returns JSON results as string
+- `fetchPage(url: string)`: Fetches page markdown content as string
+- `deepSearch(query: string, searchCount?, newsCount?, fetchCount?)`: Performs comprehensive deep search and returns JSON results as string
 
 These functions are accessible through the LLM via the scripting interface.
 
@@ -576,8 +672,10 @@ These functions are accessible through the LLM via the scripting interface.
 const results = await searchWeb('typescript best practices');
 const news = await searchNews('AI developments');
 const content = await fetchPage('https://example.com');
-const deep = await deepSearch('machine learning', 10, 5, 5);
+const deep = await deepSearch('machine learning', '10', '5', '5');
 ```
+
+**Note:** Numeric parameters are passed as strings and parsed internally.
 
 ## Documentation
 
@@ -598,19 +696,29 @@ pkg/websearch/
 │   ├── fetchPage.ts        # Page fetch tool
 │   └── deepSearch.ts       # Deep search tool
 ├── commands/               # Chat command implementations
-│   ├── websearch.ts        # Main command router
-│   ├── search.ts           # /websearch search <query>
-│   ├── news.ts             # /websearch news <query>
-│   ├── fetch.ts            # /websearch fetch <url>
-│   ├── deep.ts             # /websearch deep <query>
-│   └── provider/           # Provider management commands
-│       ├── get.ts          # Get current provider
-│       ├── set.ts          # Set provider by name
-│       ├── select.ts       # Interactive provider selection
-│       └── reset.ts        # Reset to initial provider
+│   ├── websearch/
+│   │   ├── search.ts       # /websearch search <query>
+│   │   ├── news.ts         # /websearch news <query>
+│   │   ├── fetch.ts        # /websearch fetch <url>
+│   │   ├── deep.ts         # /websearch deep <query>
+│   │   └── provider/       # Provider management commands
+│   │       ├── get.ts      # Get current provider
+│   │       ├── set.ts      # Set provider by name
+│   │       ├── select.ts   # Interactive provider selection
+│   │       └── reset.ts    # Reset to initial provider
 ├── state/                  # Agent state management
 │   └── webSearchState.ts   # Agent state slice
 └── package.json            # Package metadata and dependencies
+```
+
+### Exports
+
+The package exports the following from `index.ts`:
+
+```typescript
+export { WebSearchConfigSchema, WebSearchAgentConfigSchema } from "./schema.ts";
+export { default as WebSearchService } from "./WebSearchService.ts";
+export { default as WebSearchProvider } from "./WebSearchProvider.ts";
 ```
 
 ### Development
@@ -652,7 +760,7 @@ bun build
 
 ## Examples
 
-### Example 1: Using Serper Provider
+### Example 1: Using with Serper Provider
 
 ```typescript
 import { TokenRingApp } from '@tokenring-ai/app';
@@ -696,17 +804,17 @@ import WebSearchProvider, {
 } from '@tokenring-ai/websearch';
 
 class CustomSearchProvider extends WebSearchProvider {
-  async searchWeb(query: string, options?: any): Promise<WebSearchResult> {
+  async searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult> {
     // Implement custom search logic
     // Return structured results matching WebSearchResult interface
   }
 
-  async searchNews(query: string, options?: any): Promise<NewsSearchResult> {
+  async searchNews(query: string, options?: WebSearchProviderOptions): Promise<NewsSearchResult> {
     // Implement custom news search logic
     // Return structured results matching NewsSearchResult interface
   }
 
-  async fetchPage(url: string, options?: any): Promise<WebPageResult> {
+  async fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult> {
     // Implement custom page fetching logic
     // Return markdown content and optional metadata
   }
@@ -779,6 +887,27 @@ await scriptingService.executeScript({
 });
 ```
 
+### Example 6: Tool Usage in Agent
+
+```typescript
+import tools from '@tokenring-ai/websearch/tools';
+
+// Tools are automatically registered when plugin is installed
+// But you can also use them directly:
+
+const searchWebTool = tools.searchWeb;
+const result = await searchWebTool.execute(
+  {
+    query: 'typescript best practices',
+    num: 10,
+    countryCode: 'us'
+  },
+  agent
+);
+
+console.log(result.data); // WebSearchResult
+```
+
 ## Dependencies
 
 - `@tokenring-ai/app` - Base application framework
@@ -786,7 +915,7 @@ await scriptingService.executeScript({
 - `@tokenring-ai/chat` - Chat interface and tool definitions
 - `@tokenring-ai/utility` - Utility functions including KeyedRegistry
 - `@tokenring-ai/scripting` - Scripting service for native functions
-- `zod` - Schema validation
+- `zod` - Schema validation (^4.3.6)
 
 ## Related Components
 
@@ -795,6 +924,7 @@ await scriptingService.executeScript({
 - **@tokenring-ai/agent**: Core agent system for service integration
 - **@tokenring-ai/chat**: Chat interface for tools and commands
 - **@tokenring-ai/scripting**: Scripting service for native function execution
+- **@tokenring-ai/app**: Base application framework with plugin system
 
 ## License
 
