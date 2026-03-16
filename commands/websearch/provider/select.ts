@@ -1,10 +1,11 @@
-import {Agent} from "@tokenring-ai/agent";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {WebSearchState} from "../../../state/webSearchState.ts";
 import WebSearchService from "../../../WebSearchService.ts";
 
-async function execute(_remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
   const available = webSearch.getAvailableProviders();
   if (available.length === 0) return "No web search providers are registered.";
@@ -26,10 +27,13 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
 }
 
 export default {
-  name: "websearch provider select", description: "Interactively select a provider", help: `# /websearch provider select
-
-Interactively select the active web search provider. Auto-selects if only one provider is configured.
+  name: "websearch provider select",
+  description: "Interactively select a provider",
+  help: `Interactively select the active web search provider. Auto-selects if only one provider is configured.
 
 ## Example
 
-/websearch provider select`, execute } satisfies TokenRingAgentCommand;
+/websearch provider select`,
+  inputSchema,
+  execute,
+} satisfies TokenRingAgentCommand<typeof inputSchema>;

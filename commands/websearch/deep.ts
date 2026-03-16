@@ -1,58 +1,60 @@
-import {Agent} from "@tokenring-ai/agent";
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import {parseArgs} from "node:util";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import WebSearchService from "../../WebSearchService.js";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
-  const {values, positionals} = parseArgs({
-    args: remainder.trim().split(/\s+/),
-    options: { country: {type: 'string'}, language: {type: 'string'}, location: {type: 'string'}, search: {type: 'string'}, news: {type: 'string'}, fetch: {type: 'string'} },
-    allowPositionals: true, strict: false
-  });
-  const query = positionals.join(" ");
-  if (!query) throw new CommandFailedError("Usage: /websearch deep <query> [flags]");
+const inputSchema = {
+  args: {
+    "--country": {type: "string", description: "Country code for the search"},
+    "--language": {type: "string", description: "Language code for the search"},
+    "--location": {type: "string", description: "Location for geo-targeted results"},
+    "--search": {type: "number", description: "Number of web search results to collect"},
+    "--news": {type: "number", description: "Number of news results to collect"},
+    "--fetch": {type: "number", description: "Number of result pages to fetch"},
+  },
+  positionals: [{name: "query", description: "Deep search query", required: true, greedy: true}],
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
 
+async function execute({positionals, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const searchOptions = {
-    searchCount: values.search ? Number(values.search) : undefined,
-    newsCount: values.news ? Number(values.news) : undefined,
-    fetchCount: values.fetch ? Number(values.fetch) : undefined,
-    countryCode: values.country as string,
-    language: values.language as string,
-    location: values.location as string,
+    searchCount: args["--search"],
+    newsCount: args["--news"],
+    fetchCount: args["--fetch"],
+    countryCode: args["--country"],
+    language: args["--language"],
+    location: args["--location"],
   };
 
-  const result = await agent.requireServiceByType(WebSearchService).deepSearch(query, searchOptions, agent);
+  const result = await agent.requireServiceByType(WebSearchService).deepSearch(positionals.query, searchOptions, agent);
 
   const optionsList = [
-    searchOptions.searchCount ? `**Search Count:** ${searchOptions.searchCount}` : '',
-    searchOptions.newsCount ? `**News Count:** ${searchOptions.newsCount}` : '',
-    searchOptions.fetchCount ? `**Fetch Count:** ${searchOptions.fetchCount}` : '',
-    searchOptions.countryCode ? `**Country:** ${searchOptions.countryCode}` : '',
-    searchOptions.language ? `**Language:** ${searchOptions.language}` : '',
-    searchOptions.location ? `**Location:** ${searchOptions.location}` : '',
-  ].filter(Boolean).join('\n');
+    searchOptions.searchCount ? `**Search Count:** ${searchOptions.searchCount}` : "",
+    searchOptions.newsCount ? `**News Count:** ${searchOptions.newsCount}` : "",
+    searchOptions.fetchCount ? `**Fetch Count:** ${searchOptions.fetchCount}` : "",
+    searchOptions.countryCode ? `**Country:** ${searchOptions.countryCode}` : "",
+    searchOptions.language ? `**Language:** ${searchOptions.language}` : "",
+    searchOptions.location ? `**Location:** ${searchOptions.location}` : "",
+  ].filter(Boolean).join("\n");
 
   const resultsList = [
-    result.results.length > 0 ? `### Web Results (${result.results.length})\n${result.results.map((r, i) => `${i + 1}. ${r.title}\n   ${r.url}\n   ${r.snippet}`).join('\n\n')}` : '',
-    result.news.length > 0 ? `### News Results (${result.news.length})\n${result.news.map((n, i) => `${i + 1}. ${n.title}\n   ${n.link}\n   ${n.snippet}`).join('\n\n')}` : '',
-    result.pages.length > 0 ? `### Fetched Pages (${result.pages.length})\n${result.pages.map((p, i) => `${i + 1}. [${p.url}](${p.url}) (${p.markdown.length} characters)`).join('\n')}` : '',
-  ].filter(Boolean).join('\n\n');
+    result.results.length > 0 ? `### Web Results (${result.results.length})\n${result.results.map((r, i) => `${i + 1}. ${r.title}\n   ${r.url}\n   ${r.snippet}`).join("\n\n")}` : "",
+    result.news.length > 0 ? `### News Results (${result.news.length})\n${result.news.map((n, i) => `${i + 1}. ${n.title}\n   ${n.link}\n   ${n.snippet}`).join("\n\n")}` : "",
+    result.pages.length > 0 ? `### Fetched Pages (${result.pages.length})\n${result.pages.map((p, i) => `${i + 1}. [${p.url}](${p.url}) (${p.markdown.length} characters)`).join("\n")}` : "",
+  ].filter(Boolean).join("\n\n");
 
   agent.artifactOutput({
-    name: `Deep search for ${query}`,
-    encoding: 'text',
-    mimeType: 'text/markdown',
-    body: `# Deep Search: ${query}\n\n## Search Options\n${optionsList || 'No specific options provided'}\n\n## Results\n${resultsList || 'No results found'}`,
+    name: `Deep search for ${positionals.query}`,
+    encoding: "text",
+    mimeType: "text/markdown",
+    body: `# Deep Search: ${positionals.query}\n\n## Search Options\n${optionsList || "No specific options provided"}\n\n## Results\n${resultsList || "No results found"}`,
   });
 
   return `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`;
 }
 
 export default {
-  name: "websearch deep", description: "Comprehensive search with content fetching", help: `# /websearch deep <query> [options]
-
-Perform a comprehensive search combining web search, news, and page fetching.
+  name: "websearch deep",
+  description: "Comprehensive search with content fetching",
+  help: `Perform a comprehensive search combining web search, news, and page fetching.
 
 ## Options
 
@@ -61,8 +63,12 @@ Perform a comprehensive search combining web search, news, and page fetching.
 --fetch <n>        Number of pages to fetch (default: 5)
 --country <code>   Country code
 --language <code>  Language code
+--location <name>  Location for geo-targeted results
 
 ## Example
 
 /websearch deep quantum computing
-/websearch deep artificial intelligence --search 20 --news 5 --fetch 10`, execute } satisfies TokenRingAgentCommand;
+/websearch deep --search 20 --news 5 --fetch 10 artificial intelligence`,
+  inputSchema,
+  execute,
+} satisfies TokenRingAgentCommand<typeof inputSchema>;

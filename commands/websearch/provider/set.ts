@@ -1,12 +1,15 @@
-import {Agent} from "@tokenring-ai/agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import WebSearchService from "../../../WebSearchService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {
+  args: {},
+  positionals: [{name: "providerName", description: "Provider name", required: true}],
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({positionals: { providerName }, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
-  const providerName = remainder.trim();
-  if (!providerName) throw new CommandFailedError("Usage: /websearch provider set <name>");
   const available = webSearch.getAvailableProviders();
   if (available.includes(providerName)) {
     webSearch.setActiveProvider(providerName, agent);
@@ -16,10 +19,13 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
 }
 
 export default {
-  name: "websearch provider set", description: "Set the active provider", help: `# /websearch provider set <name>
-
-Set the active web search provider by name.
+  name: "websearch provider set",
+  description: "Set the active provider",
+  help: `Set the active web search provider by name.
 
 ## Example
 
-/websearch provider set tavily`, execute } satisfies TokenRingAgentCommand;
+/websearch provider set tavily`,
+  inputSchema,
+  execute,
+} satisfies TokenRingAgentCommand<typeof inputSchema>;
