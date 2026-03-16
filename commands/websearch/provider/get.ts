@@ -4,7 +4,7 @@ import {WebSearchState} from "../../../state/webSearchState.ts";
 
 export default {
   name: "websearch provider get",
-  description: "/websearch provider get - Show current provider",
+  description: "Show current provider",
   help: `# /websearch provider get
 
 Display the currently active web search provider.

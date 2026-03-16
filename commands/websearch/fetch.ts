@@ -16,7 +16,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Fetched ${result.markdown.length} characters`;
 }
 
-export default { name: "websearch fetch", description: "/websearch fetch - Fetch content from a URL", help: `# /websearch fetch <url> [options]
+export default {
+  name: "websearch fetch", description: "Fetch content from a URL", help: `# /websearch fetch <url> [options]
 
 Fetch and extract content from a specific web page as markdown.
 

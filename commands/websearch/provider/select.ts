@@ -25,7 +25,8 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
   return "Provider selection cancelled.";
 }
 
-export default { name: "websearch provider select", description: "/websearch provider select - Interactively select a provider", help: `# /websearch provider select
+export default {
+  name: "websearch provider select", description: "Interactively select a provider", help: `# /websearch provider select
 
 Interactively select the active web search provider. Auto-selects if only one provider is configured.
 

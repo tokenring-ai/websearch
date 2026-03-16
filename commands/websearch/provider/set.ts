@@ -15,7 +15,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Provider "${providerName}" not found. Available providers: ${available.join(", ")}`;
 }
 
-export default { name: "websearch provider set", description: "/websearch provider set - Set the active provider", help: `# /websearch provider set <name>
+export default {
+  name: "websearch provider set", description: "Set the active provider", help: `# /websearch provider set <name>
 
 Set the active web search provider by name.
 

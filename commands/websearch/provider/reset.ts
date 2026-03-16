@@ -11,7 +11,8 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
   return `Provider reset to ${initialProvider}`;
 }
 
-export default { name: "websearch provider reset", description: "/websearch provider reset - Reset to initial provider", help: `# /websearch provider reset
+export default {
+  name: "websearch provider reset", description: "Reset to initial provider", help: `# /websearch provider reset
 
 Reset the active web search provider to the initial configured value.
 

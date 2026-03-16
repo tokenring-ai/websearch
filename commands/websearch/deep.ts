@@ -49,7 +49,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`;
 }
 
-export default { name: "websearch deep", description: "/websearch deep - Comprehensive search with content fetching", help: `# /websearch deep <query> [options]
+export default {
+  name: "websearch deep", description: "Comprehensive search with content fetching", help: `# /websearch deep <query> [options]
 
 Perform a comprehensive search combining web search, news, and page fetching.
 

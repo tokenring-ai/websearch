@@ -20,7 +20,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Search results: ${JSON.stringify(result).slice(0, 500)}...`;
 }
 
-export default { name: "websearch search", description: "/websearch search - Perform a web search", help: `# /websearch search <query> [options]
+export default {
+  name: "websearch search", description: "Perform a web search", help: `# /websearch search <query> [options]
 
 Perform a general web search.
 
