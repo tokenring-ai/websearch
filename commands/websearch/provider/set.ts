@@ -1,11 +1,9 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import WebSearchService from "../../../WebSearchService.ts";
 
 const inputSchema = {
   args: {},
-  positionals: [{name: "providerName", description: "Provider name", required: true}],
-  allowAttachments: false,
+  positionals: [{name: "providerName", description: "Provider name", required: true}]
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({positionals: { providerName }, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {

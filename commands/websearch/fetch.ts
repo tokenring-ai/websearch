@@ -6,8 +6,7 @@ const inputSchema = {
     "--country": {type: "string", description: "Country code to use for the fetch request"},
     "--render": {type: "flag", description: "Enable JavaScript rendering for dynamic content"},
   },
-  positionals: [{name: "url", description: "URL to fetch", required: true}],
-  allowAttachments: false,
+  positionals: [{name: "url", description: "URL to fetch", required: true}]
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({positionals, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {

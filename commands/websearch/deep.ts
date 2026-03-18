@@ -10,11 +10,10 @@ const inputSchema = {
     "--news": {type: "number", description: "Number of news results to collect"},
     "--fetch": {type: "number", description: "Number of result pages to fetch"},
   },
-  positionals: [{name: "query", description: "Deep search query", required: true, greedy: true}],
-  allowAttachments: false,
+  remainder: {name: "query", description: "Deep search query", required: true}
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({positionals, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({remainder, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const searchOptions = {
     searchCount: args["--search"],
     newsCount: args["--news"],
@@ -24,7 +23,7 @@ async function execute({positionals, args, agent}: AgentCommandInputType<typeof 
     location: args["--location"],
   };
 
-  const result = await agent.requireServiceByType(WebSearchService).deepSearch(positionals.query, searchOptions, agent);
+  const result = await agent.requireServiceByType(WebSearchService).deepSearch(remainder, searchOptions, agent);
 
   const optionsList = [
     searchOptions.searchCount ? `**Search Count:** ${searchOptions.searchCount}` : "",
@@ -42,10 +41,10 @@ async function execute({positionals, args, agent}: AgentCommandInputType<typeof 
   ].filter(Boolean).join("\n\n");
 
   agent.artifactOutput({
-    name: `Deep search for ${positionals.query}`,
+    name: `Deep search for ${remainder}`,
     encoding: "text",
     mimeType: "text/markdown",
-    body: `# Deep Search: ${positionals.query}\n\n## Search Options\n${optionsList || "No specific options provided"}\n\n## Results\n${resultsList || "No results found"}`,
+    body: `# Deep Search: ${remainder}\n\n## Search Options\n${optionsList || "No specific options provided"}\n\n## Results\n${resultsList || "No results found"}`,
   });
 
   return `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`;

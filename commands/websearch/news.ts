@@ -9,12 +9,11 @@ const inputSchema = {
     "--num": {type: "number", description: "Number of results to request"},
     "--page": {type: "number", description: "Result page number"},
   },
-  positionals: [{name: "query", description: "News query", required: true, greedy: true}],
-  allowAttachments: false,
+  remainder: {name: "query", description: "News query", required: true}
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({positionals, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const result = await agent.requireServiceByType(WebSearchService).searchNews(positionals.query, {
+async function execute({remainder, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const result = await agent.requireServiceByType(WebSearchService).searchNews(remainder, {
     countryCode: args["--country"],
     language: args["--language"],
     location: args["--location"],
