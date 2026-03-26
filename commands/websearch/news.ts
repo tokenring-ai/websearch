@@ -1,5 +1,5 @@
 import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import WebSearchService from "../../WebSearchService.js";
+import WebSearchService from "../../WebSearchService.ts";
 
 const inputSchema = {
   args: {

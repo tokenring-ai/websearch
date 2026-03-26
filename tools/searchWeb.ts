@@ -2,7 +2,7 @@ import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import {WebSearchResult} from "../WebSearchProvider.ts";
-import WebSearchService from "../WebSearchService.js";
+import WebSearchService from "../WebSearchService.ts";
 
 const name = "websearch_searchWeb";
 const displayName = "Websearch/searchWeb";
