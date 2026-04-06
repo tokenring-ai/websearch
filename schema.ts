@@ -5,8 +5,7 @@ export const WebSearchAgentConfigSchema = z.object({
 }).default({});
 
 export const WebSearchConfigSchema = z.object({
-  providers: z.record(z.string(), z.any()),
   agentDefaults: z.object({
-    provider: z.string()
-  })
-});
+    provider: z.string().optional(),
+  }).prefault({})
+}).prefault({});

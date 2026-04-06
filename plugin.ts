@@ -11,15 +11,15 @@ import tools from "./tools.ts";
 import WebSearchService from "./WebSearchService.ts";
 
 const packageConfigSchema = z.object({
-  websearch: WebSearchConfigSchema.optional()
+  websearch: WebSearchConfigSchema
 });
 
 export default {
   name: packageJSON.name,
+  displayName: "Web Search",
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    if (! config.websearch) return;
     app.addServices(new WebSearchService(config.websearch));
     app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("searchWeb", {
