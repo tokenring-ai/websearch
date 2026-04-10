@@ -1,7 +1,7 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
+import type Agent from "@tokenring-ai/agent/Agent";
+import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
-import {NewsSearchResult} from "../WebSearchProvider.ts";
+import type {NewsSearchResult} from "../WebSearchProvider.ts";
 import WebSearchService from "../WebSearchService.ts";
 
 const name = "websearch_searchNews";
@@ -18,19 +18,22 @@ async function execute(
   }: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<TokenRingToolJSONResult<NewsSearchResult>> {
-
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   agent.infoMessage(`[${name}] Searching news: ${query}`);
   return {
     type: "json",
-    data: await webSearch.searchNews(query, {
-      countryCode,
-      language,
-      location,
-      num,
-      page,
-    }, agent)
+    data: await webSearch.searchNews(
+      query,
+      {
+        countryCode,
+        language,
+        location,
+        num,
+        page,
+      },
+      agent,
+    ),
   };
 }
 
@@ -46,5 +49,9 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, displayName, description, inputSchema, execute,
+  name,
+  displayName,
+  description,
+  inputSchema,
+  execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

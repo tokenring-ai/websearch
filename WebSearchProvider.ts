@@ -75,7 +75,7 @@ export interface WebPageOptions {
 export type WebPageResult = {
   markdown: string;
   metadata?: Record<string, string>;
-}
+};
 
 export interface DeepSearchOptions extends WebSearchProviderOptions {
   searchCount?: number;
@@ -87,13 +87,26 @@ export interface DeepSearchOptions extends WebSearchProviderOptions {
 export interface DeepSearchResult {
   results: any[];
   news: NewsItem[];
-  pages: Array<{ url: string; markdown: string; metadata?: Record<string, string> }>;
+  pages: Array<{
+    url: string;
+    markdown: string;
+    metadata?: Record<string, string>;
+  }>;
 }
 
-export default abstract class WebSearchProvider {
-  abstract searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>;
+export interface WebSearchProvider {
+  searchWeb(
+    query: string,
+    options?: WebSearchProviderOptions,
+  ): Promise<WebSearchResult>;
 
-  abstract searchNews(query: string, options?: WebSearchProviderOptions): Promise<NewsSearchResult>;
+  searchNews(
+    query: string,
+    options?: WebSearchProviderOptions,
+  ): Promise<NewsSearchResult>;
 
-  abstract fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>;
+  fetchPage(
+    url: string,
+    options?: WebPageOptions,
+  ): Promise<WebPageResult>;
 }

@@ -1,20 +1,21 @@
-import {Agent} from "@tokenring-ai/agent";
+import type {Agent} from "@tokenring-ai/agent";
 import type {AgentCreationContext} from "@tokenring-ai/agent/types";
-import {TokenRingService} from "@tokenring-ai/app/types";
+import type {TokenRingService} from "@tokenring-ai/app/types";
 import deepMerge from "@tokenring-ai/utility/object/deepMerge";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
-import z from "zod";
-import {WebSearchAgentConfigSchema, WebSearchConfigSchema} from "./schema.ts";
+import type z from "zod";
+import {WebSearchAgentConfigSchema, type WebSearchConfigSchema} from "./schema.ts";
 import {WebSearchState} from "./state/webSearchState.ts";
-import WebSearchProvider, {
-  type DeepSearchOptions,
-  type DeepSearchResult,
+import type {
+  DeepSearchOptions,
+  DeepSearchResult,
   NewsSearchResult,
-  type WebPageOptions,
-  type WebPageResult,
-  type WebSearchProviderOptions,
+  WebPageOptions,
+  WebPageResult,
+  WebSearchProvider,
+  WebSearchProviderOptions,
   WebSearchResult,
-} from "./WebSearchProvider.js";
+} from "./WebSearchProvider.ts";
 
 export default class WebSearchService implements TokenRingService {
   readonly name = "WebSearchService";
@@ -25,10 +26,14 @@ export default class WebSearchService implements TokenRingService {
   registerProvider = this.providerRegistry.register;
   getAvailableProviders = this.providerRegistry.getAllItemNames;
 
-  constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {}
+  constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {
+  }
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
-    const config = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice('websearch', WebSearchAgentConfigSchema));
+    const config = deepMerge(
+      this.options.agentDefaults,
+      agent.getAgentConfigSlice("websearch", WebSearchAgentConfigSchema),
+    );
     if (config.provider) {
       creationContext.items.push(`Web Search Provider: ${config.provider}`);
     } else {
@@ -45,7 +50,8 @@ export default class WebSearchService implements TokenRingService {
 
   requireActiveProvider(agent: Agent): WebSearchProvider {
     const providerName = agent.getState(WebSearchState).provider;
-    if (! providerName) throw new Error("No web search provider has been enabled.");
+    if (!providerName)
+      throw new Error("No web search provider has been enabled.");
     return this.providerRegistry.requireItemByName(providerName);
   }
 
@@ -55,26 +61,46 @@ export default class WebSearchService implements TokenRingService {
     });
   }
 
-  async searchWeb(query: string, options: WebSearchProviderOptions | undefined, agent: Agent): Promise<WebSearchResult> {
+  searchWeb(
+    query: string,
+    options: WebSearchProviderOptions | undefined,
+    agent: Agent,
+  ): Promise<WebSearchResult> {
     return this.requireActiveProvider(agent).searchWeb(query, options);
   }
 
-  async searchNews(query: string, options: WebSearchProviderOptions | undefined, agent: Agent): Promise<NewsSearchResult> {
+  searchNews(
+    query: string,
+    options: WebSearchProviderOptions | undefined,
+    agent: Agent,
+  ): Promise<NewsSearchResult> {
     return this.requireActiveProvider(agent).searchNews(query, options);
   }
 
-  async fetchPage(url: string, options: WebPageOptions | undefined, agent: Agent): Promise<WebPageResult> {
+  fetchPage(
+    url: string,
+    options: WebPageOptions | undefined,
+    agent: Agent,
+  ): Promise<WebPageResult> {
     return this.requireActiveProvider(agent).fetchPage(url, options);
   }
 
-  async deepSearch(query: string, options: DeepSearchOptions | undefined, agent: Agent): Promise<DeepSearchResult> {
+  async deepSearch(
+    query: string,
+    options: DeepSearchOptions | undefined,
+    agent: Agent,
+  ): Promise<DeepSearchResult> {
     const searchCount = options?.searchCount ?? 10;
     const newsCount = options?.newsCount ?? 0;
     const fetchCount = options?.fetchCount ?? 5;
 
     const [searchResult, newsResult] = await Promise.all([
-      searchCount > 0 ? this.searchWeb(query, {...options, num: searchCount}, agent) : null,
-      newsCount > 0 ? this.searchNews(query, {...options, num: newsCount}, agent) : null
+      searchCount > 0
+        ? this.searchWeb(query, {...options, num: searchCount}, agent)
+        : null,
+      newsCount > 0
+        ? this.searchNews(query, {...options, num: newsCount}, agent)
+        : null,
     ]);
 
     let results = searchResult?.organic ?? [];
@@ -90,18 +116,22 @@ export default class WebSearchService implements TokenRingService {
         const url = result.url || result.link;
         if (!url) return null;
         try {
-          const page = await this.fetchPage(url, {countryCode: options?.countryCode}, agent);
+          const page = await this.fetchPage(
+            url,
+            {countryCode: options?.countryCode},
+            agent,
+          );
           return {url, ...page};
         } catch {
           return null;
         }
-      })
+      }),
     );
 
     return {
       results,
       news,
-      pages: pages.filter((p): p is NonNullable<typeof p> => p !== null)
+      pages: pages.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   }
 }

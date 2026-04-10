@@ -1,11 +1,17 @@
 import {z} from "zod";
 
-export const WebSearchAgentConfigSchema = z.object({
-  provider: z.string().optional()
-}).default({});
-
-export const WebSearchConfigSchema = z.object({
-  agentDefaults: z.object({
+export const WebSearchAgentConfigSchema = z
+  .object({
     provider: z.string().optional(),
-  }).prefault({})
-}).prefault({});
+  })
+  .default({});
+
+export const WebSearchConfigSchema = z
+  .object({
+    agentDefaults: z
+      .object({
+        provider: z.string().optional(),
+      })
+      .prefault({}),
+  })
+  .prefault({});
