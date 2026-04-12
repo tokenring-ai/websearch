@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.ts";
 
@@ -17,33 +17,25 @@ async function execute(
     location,
   }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<
-  TokenRingToolJSONResult<{
-    results: any[];
-    news: any[];
-    pages: Array<{ url: string; markdown: string }>;
-  }>
-> {
+): Promise<TokenRingToolResult> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   agent.infoMessage(
     `[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`,
   );
-  return {
-    type: "json",
-    data: await webSearch.deepSearch(
-      query,
-      {
-        searchCount,
-        newsCount,
-        fetchCount,
-        countryCode,
-        language,
-        location,
-      },
-      agent,
-    ),
-  };
+  const data = await webSearch.deepSearch(
+    query,
+    {
+      searchCount,
+      newsCount,
+      fetchCount,
+      countryCode,
+      language,
+      location,
+    },
+    agent,
+  );
+  return JSON.stringify(data);
 }
 
 const description =

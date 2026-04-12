@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WebSearchService from "../WebSearchService.ts";
 
@@ -9,9 +9,7 @@ const displayName = "Websearch/fetchPage";
 async function execute(
   {url, render, countryCode}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<
-  TokenRingToolJSONResult<{ markdown: string; metadata?: Record<string, any> }>
-> {
+): Promise<TokenRingToolResult> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   agent.infoMessage(`[${name}] Fetching: ${url}`);
@@ -23,10 +21,7 @@ async function execute(
     },
     agent,
   );
-  return {
-    type: "json",
-    data: {markdown: result.markdown},
-  };
+  return result.markdown;
 }
 
 const description = "Fetch a web page using the active web search provider";

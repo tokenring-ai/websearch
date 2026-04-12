@@ -1,7 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
-import type {NewsSearchResult} from "../WebSearchProvider.ts";
 import WebSearchService from "../WebSearchService.ts";
 
 const name = "websearch_searchNews";
@@ -17,24 +16,22 @@ async function execute(
     page,
   }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<TokenRingToolJSONResult<NewsSearchResult>> {
+): Promise<TokenRingToolResult> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
   agent.infoMessage(`[${name}] Searching news: ${query}`);
-  return {
-    type: "json",
-    data: await webSearch.searchNews(
-      query,
-      {
-        countryCode,
-        language,
-        location,
-        num,
-        page,
-      },
-      agent,
-    ),
-  };
+  const data = await webSearch.searchNews(
+    query,
+    {
+      countryCode,
+      language,
+      location,
+      num,
+      page,
+    },
+    agent,
+  );
+  return JSON.stringify(data);
 }
 
 const description = "Search news using the active web search provider";
