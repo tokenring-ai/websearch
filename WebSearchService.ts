@@ -23,8 +23,8 @@ export default class WebSearchService implements TokenRingService {
 
   private providerRegistry = new KeyedRegistry<WebSearchProvider>();
 
-  registerProvider = this.providerRegistry.register;
-  getAvailableProviders = this.providerRegistry.getAllItemNames;
+  registerProvider = this.providerRegistry.set;
+  getAvailableProviders = this.providerRegistry.keysArray;
 
   constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {
   }
@@ -37,7 +37,7 @@ export default class WebSearchService implements TokenRingService {
     if (config.provider) {
       creationContext.items.push(`Web Search Provider: ${config.provider}`);
     } else {
-      const providers = this.providerRegistry.getAllItemNames().sort();
+      const providers = this.providerRegistry.keysArray().sort();
       if (providers.length === 0) {
         creationContext.items.push("Web Search Provider: (none)");
       } else {
@@ -52,7 +52,7 @@ export default class WebSearchService implements TokenRingService {
     const providerName = agent.getState(WebSearchState).provider;
     if (!providerName)
       throw new Error("No web search provider has been enabled.");
-    return this.providerRegistry.requireItemByName(providerName);
+    return this.providerRegistry.require(providerName);
   }
 
   setActiveProvider(name: string, agent: Agent): void {
