@@ -3,11 +3,11 @@ import WebSearchService from "../../WebSearchService.ts";
 
 const inputSchema = {
   args: {
-    "--country": {
+    "country": {
       type: "string",
       description: "Country code to use for the fetch request",
     },
-    "--render": {
+    "render": {
       type: "flag",
       description: "Enable JavaScript rendering for dynamic content",
     },
@@ -23,8 +23,8 @@ async function execute({
   const result = await agent.requireServiceByType(WebSearchService).fetchPage(
     positionals.url,
     {
-      render: args["--render"],
-      countryCode: args["--country"],
+      render: args.render,
+      countryCode: args.country,
     },
     agent,
   );

@@ -3,20 +3,20 @@ import WebSearchService from "../../WebSearchService.ts";
 
 const inputSchema = {
   args: {
-    "--country": {
+    "country": {
       type: "string",
       description: "Country code for the search, for example us or uk",
     },
-    "--language": {
+    "language": {
       type: "string",
       description: "Language code for the search, for example en or fr",
     },
-    "--location": {
+    "location": {
       type: "string",
       description: "Location for geo-targeted results",
     },
-    "--num": {type: "number", description: "Number of results to request"},
-    "--page": {type: "number", description: "Result page number"},
+    "num": {type: "number", description: "Number of results to request"},
+    "page": {type: "number", description: "Result page number"},
   },
   remainder: {name: "query", description: "Search query", required: true},
 } as const satisfies AgentCommandInputSchema;
@@ -29,11 +29,11 @@ async function execute({
   const result = await agent.requireServiceByType(WebSearchService).searchWeb(
     remainder,
     {
-      countryCode: args["--country"],
-      language: args["--language"],
-      location: args["--location"],
-      num: args["--num"],
-      page: args["--page"],
+      countryCode: args.country,
+      language: args.language,
+      location: args.location,
+      num: args.num,
+      page: args.page,
     },
     agent,
   );

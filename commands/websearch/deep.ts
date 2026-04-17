@@ -3,24 +3,24 @@ import WebSearchService from "../../WebSearchService.ts";
 
 const inputSchema = {
   args: {
-    "--country": {type: "string", description: "Country code for the search"},
-    "--language": {
+    "country": {type: "string", description: "Country code for the search"},
+    "language": {
       type: "string",
       description: "Language code for the search",
     },
-    "--location": {
+    "location": {
       type: "string",
       description: "Location for geo-targeted results",
     },
-    "--search": {
+    "search": {
       type: "number",
       description: "Number of web search results to collect",
     },
-    "--news": {
+    "news": {
       type: "number",
       description: "Number of news results to collect",
     },
-    "--fetch": {
+    "fetch": {
       type: "number",
       description: "Number of result pages to fetch",
     },
@@ -38,12 +38,12 @@ async function execute({
                          agent,
                        }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const searchOptions = {
-    searchCount: args["--search"],
-    newsCount: args["--news"],
-    fetchCount: args["--fetch"],
-    countryCode: args["--country"],
-    language: args["--language"],
-    location: args["--location"],
+    searchCount: args.search,
+    newsCount: args.news,
+    fetchCount: args.fetch,
+    countryCode: args.country,
+    language: args.language,
+    location: args.location,
   };
 
   const result = await agent
