@@ -1,17 +1,12 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import WebSearchService from "../../../WebSearchService.ts";
 
 const inputSchema = {
   args: {},
-  positionals: [
-    {name: "providerName", description: "Provider name", required: true},
-  ],
+  positionals: [{ name: "providerName", description: "Provider name", required: true }],
 } as const satisfies AgentCommandInputSchema;
 
-function execute({
-                   positionals: {providerName},
-                   agent,
-                 }: AgentCommandInputType<typeof inputSchema>): string {
+function execute({ positionals: { providerName }, agent }: AgentCommandInputType<typeof inputSchema>): string {
   const webSearch = agent.requireServiceByType(WebSearchService);
   const available = webSearch.getAvailableProviders();
   if (available.includes(providerName)) {

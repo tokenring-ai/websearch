@@ -7,13 +7,4 @@ import providerSelect from "./commands/websearch/provider/select.ts";
 import providerSet from "./commands/websearch/provider/set.ts";
 import search from "./commands/websearch/search.ts";
 
-export default [
-  search,
-  news,
-  fetch,
-  deep,
-  providerGet,
-  providerSet,
-  providerSelect,
-  providerReset,
-];
+export default [search, news, fetch, deep, providerGet, providerSet, providerSelect, providerReset];

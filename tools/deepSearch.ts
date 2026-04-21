@@ -1,28 +1,18 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import WebSearchService from "../WebSearchService.ts";
 
 const name = "websearch_deepSearch";
 const displayName = "Websearch/deepSearch";
 
 async function execute(
-  {
-    query,
-    searchCount,
-    newsCount,
-    fetchCount,
-    countryCode,
-    language,
-    location,
-  }: z.output<typeof inputSchema>,
+  { query, searchCount, newsCount, fetchCount, countryCode, language, location }: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<TokenRingToolResult> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
-  agent.infoMessage(
-    `[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`,
-  );
+  agent.infoMessage(`[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`);
   const data = await webSearch.deepSearch(
     query,
     {
@@ -38,8 +28,7 @@ async function execute(
   return JSON.stringify(data);
 }
 
-const description =
-  "Perform a deep search: search the web, then fetch and return full page content for top results";
+const description = "Perform a deep search: search the web, then fetch and return full page content for top results";
 
 const inputSchema = z.object({
   query: z.string().min(1).describe("A short search query to perform"),
@@ -47,25 +36,13 @@ const inputSchema = z.object({
     .number()
     .int()
     .positive()
-    .optional()
-    .describe(
-      "Number of general search results links to include. Should be set to 0 or a low number if the search is for news",
-    ),
-  newsCount: z
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .describe("Number of news articles to search for"),
-  fetchCount: z
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .describe("Number of pages to fetch full page content for(default: 5)"),
-  countryCode: z.string().optional().describe("Country code"),
-  language: z.string().optional().describe("Language code"),
-  location: z.string().optional().describe("Location string"),
+    .exactOptional()
+    .describe("Number of general search results links to include. Should be set to 0 or a low number if the search is for news"),
+  newsCount: z.number().int().positive().exactOptional().describe("Number of news articles to search for"),
+  fetchCount: z.number().int().positive().exactOptional().describe("Number of pages to fetch full page content for(default: 5)"),
+  countryCode: z.string().exactOptional().describe("Country code"),
+  language: z.string().exactOptional().describe("Language code"),
+  location: z.string().exactOptional().describe("Location string"),
 });
 
 export default {

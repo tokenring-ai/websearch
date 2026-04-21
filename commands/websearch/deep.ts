@@ -1,26 +1,26 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import WebSearchService from "../../WebSearchService.ts";
 
 const inputSchema = {
   args: {
-    "country": {type: "string", description: "Country code for the search"},
-    "language": {
+    country: { type: "string", description: "Country code for the search" },
+    language: {
       type: "string",
       description: "Language code for the search",
     },
-    "location": {
+    location: {
       type: "string",
       description: "Location for geo-targeted results",
     },
-    "search": {
+    search: {
       type: "number",
       description: "Number of web search results to collect",
     },
-    "news": {
+    news: {
       type: "number",
       description: "Number of news results to collect",
     },
-    "fetch": {
+    fetch: {
       type: "number",
       description: "Number of result pages to fetch",
     },
@@ -32,11 +32,7 @@ const inputSchema = {
   },
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({
-                         remainder,
-                         args,
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ remainder, args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const searchOptions = {
     searchCount: args.search,
     newsCount: args.news,
@@ -46,21 +42,13 @@ async function execute({
     location: args.location,
   };
 
-  const result = await agent
-    .requireServiceByType(WebSearchService)
-    .deepSearch(remainder, searchOptions, agent);
+  const result = await agent.requireServiceByType(WebSearchService).deepSearch(remainder, searchOptions, agent);
 
   const optionsList = [
-    searchOptions.searchCount
-      ? `**Search Count:** ${searchOptions.searchCount}`
-      : "",
+    searchOptions.searchCount ? `**Search Count:** ${searchOptions.searchCount}` : "",
     searchOptions.newsCount ? `**News Count:** ${searchOptions.newsCount}` : "",
-    searchOptions.fetchCount
-      ? `**Fetch Count:** ${searchOptions.fetchCount}`
-      : "",
-    searchOptions.countryCode
-      ? `**Country:** ${searchOptions.countryCode}`
-      : "",
+    searchOptions.fetchCount ? `**Fetch Count:** ${searchOptions.fetchCount}` : "",
+    searchOptions.countryCode ? `**Country:** ${searchOptions.countryCode}` : "",
     searchOptions.language ? `**Language:** ${searchOptions.language}` : "",
     searchOptions.location ? `**Location:** ${searchOptions.location}` : "",
   ]

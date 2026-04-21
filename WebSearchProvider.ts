@@ -1,34 +1,35 @@
 export interface WebSearchProviderOptions {
-  countryCode?: string;
-  language?: string;
-  location?: string;
-  num?: number;
-  page?: number;
-  timeout?: number;
+  countryCode?: string | undefined;
+  language?: string | undefined;
+  location?: string | undefined;
+  num?: number | undefined;
+  page?: number | undefined;
+  timeout?: number | undefined;
 }
 
 export type NewsItem = {
   title: string;
   link: string;
-  snippet?: string;
+  snippet?: string | undefined;
   date: string;
   source: string;
-  position?: number;
+  position?: number | undefined;
 };
+
 export interface NewsSearchResult {
   news: NewsItem[];
 }
 
 export interface KnowledgeGraph {
-  position?: number;
+  position?: number | undefined;
   title: string;
   type: string;
-  website?: string;
-  imageUrl?: string;
-  description?: string;
-  descriptionSource?: string;
-  descriptionLink?: string;
-  attributes?: Record<string, string>;
+  website?: string | undefined;
+  imageUrl?: string | undefined;
+  description?: string | undefined;
+  descriptionSource?: string | undefined;
+  descriptionLink?: string | undefined;
+  attributes?: Record<string, string> | undefined;
 }
 
 export interface Sitelink {
@@ -42,8 +43,8 @@ export interface OrganicResult {
   snippet: string;
   sitelinks?: Sitelink[];
   position: number;
-  date?: string;
-  attributes?: Record<string, string>;
+  date?: string | undefined;
+  attributes?: Record<string, string> | undefined;
 }
 
 export interface PeopleAlsoAsk {
@@ -54,33 +55,33 @@ export interface PeopleAlsoAsk {
 }
 
 export interface RelatedSearch {
-  position?: number;
+  position?: number | undefined;
   query: string;
 }
 
 export interface WebSearchResult {
-  knowledgeGraph?: KnowledgeGraph;
+  knowledgeGraph?: KnowledgeGraph | undefined;
   organic: OrganicResult[];
-  peopleAlsoAsk?: PeopleAlsoAsk[];
-  relatedSearches?: RelatedSearch[];
+  peopleAlsoAsk?: PeopleAlsoAsk[] | undefined;
+  relatedSearches?: RelatedSearch[] | undefined;
 }
 
 export interface WebPageOptions {
-  render?: boolean;
-  countryCode?: string;
-  timeout?: number;
-  deviceType?: "desktop" | "mobile";
+  render?: boolean | undefined;
+  countryCode?: string | undefined;
+  timeout?: number | undefined;
+  deviceType?: "desktop" | "mobile" | undefined;
 }
 
 export type WebPageResult = {
   markdown: string;
-  metadata?: Record<string, string>;
+  metadata?: Record<string, string> | undefined;
 };
 
 export interface DeepSearchOptions extends WebSearchProviderOptions {
-  searchCount?: number;
-  newsCount?: number;
-  fetchCount?: number;
+  searchCount?: number | undefined;
+  newsCount?: number | undefined;
+  fetchCount?: number | undefined;
   rerank?: (results: any[]) => Promise<any[]>;
 }
 
@@ -90,23 +91,14 @@ export interface DeepSearchResult {
   pages: Array<{
     url: string;
     markdown: string;
-    metadata?: Record<string, string>;
+    metadata?: Record<string, string> | undefined;
   }>;
 }
 
 export interface WebSearchProvider {
-  searchWeb(
-    query: string,
-    options?: WebSearchProviderOptions,
-  ): Promise<WebSearchResult>;
+  searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>;
 
-  searchNews(
-    query: string,
-    options?: WebSearchProviderOptions,
-  ): Promise<NewsSearchResult>;
+  searchNews(query: string, options?: WebSearchProviderOptions): Promise<NewsSearchResult>;
 
-  fetchPage(
-    url: string,
-    options?: WebPageOptions,
-  ): Promise<WebPageResult>;
+  fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>;
 }

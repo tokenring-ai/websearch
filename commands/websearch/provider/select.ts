@@ -1,13 +1,11 @@
-import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import {WebSearchState} from "../../../state/webSearchState.ts";
+import type { TreeLeaf } from "@tokenring-ai/agent/question";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
+import { WebSearchState } from "../../../state/webSearchState.ts";
 import WebSearchService from "../../../WebSearchService.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
-async function execute({
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const webSearch = agent.requireServiceByType(WebSearchService);
   const available = webSearch.getAvailableProviders();
   if (available.length === 0) return "No web search providers are registered.";
@@ -16,7 +14,7 @@ async function execute({
     return `Only one provider configured, auto-selecting: ${available[0]}`;
   }
   const activeProvider = agent.getState(WebSearchState).provider;
-  const tree: TreeLeaf[] = available.map((name) => ({
+  const tree: TreeLeaf[] = available.map(name => ({
     name: `${name}${name === activeProvider ? " (current)" : ""}`,
     value: name,
   }));
