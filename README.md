@@ -2,12 +2,16 @@
 
 ## Overview
 
-The `@tokenring-ai/websearch` package provides a comprehensive web search interface for the Token Ring AI ecosystem. It serves as an abstract service layer that enables agents to query the web dynamically, process search results, and fetch content for tasks like research, data gathering, and real-time information retrieval.
+The `@tokenring-ai/websearch` package provides a comprehensive web search interface for the Token Ring AI ecosystem. It
+serves as an abstract service layer that enables agents to query the web dynamically, process search results, and fetch
+content for tasks like research, data gathering, and real-time information retrieval.
 
-As a core abstract interface package, it defines the contract that concrete search provider implementations must follow. It integrates seamlessly with the Token Ring framework through its plugin system, offering:
+As a core abstract interface package, it defines the contract that concrete search provider implementations must follow.
+It integrates seamlessly with the Token Ring framework through its plugin system, offering:
 
-- **Four interactive tools** for agent operations (`websearch_searchWeb`, `websearch_searchNews`, `websearch_fetchPage`, `websearch_deepSearch`)
-- **Agent command interface** for CLI-based operations (`/websearch` with 8 subcommands)
+- **Four interactive tools** for agent operations (`websearch_searchWeb`, `websearch_searchNews`, `websearch_fetchPage`,
+  `websearch_deepSearch`)
+- **Eight chat commands** for interactive CLI operations (`/websearch` with subcommands)
 - **Four global scripting functions** accessible through the scripting service
 - **Service layer integration** with provider registry and state management
 - **Deep search with custom reranking** for advanced result processing
@@ -19,10 +23,9 @@ As a core abstract interface package, it defines the contract that concrete sear
 - **Comprehensive Search Operations**: Web search, news search, page fetching, and deep search
 - **Agent State Management**: Persistent provider selection per agent via `WebSearchState`
 - **Interactive Tools**: Four agent-usable tools with Zod schema validation
-- **CLI Commands**: Full-featured `/websearch` command with 8 subcommands and options
+- **CLI Commands**: Full-featured `/websearch` command with 8 subcommands
 - **Scripting Functions**: Global functions for LLM access to search capabilities
 - **Configurable Options**: Country/region targeting, language localization, pagination
-- **Error Handling**: Proper validation with `CommandFailedError` and standardized error responses
 - **Deep Search with Reranking**: Custom result sorting support via optional `rerank` function
 - **Parallel Execution**: Deep search executes web and news searches in parallel for performance
 
@@ -34,32 +37,35 @@ bun add @tokenring-ai/websearch
 
 ## Dependencies
 
-- `@tokenring-ai/app`: ^0.2.0
-- `@tokenring-ai/agent`: ^0.2.0
-- `@tokenring-ai/chat`: ^0.2.0
-- `@tokenring-ai/utility`: ^0.2.0
-- `@tokenring-ai/scripting`: ^0.2.0
+- `@tokenring-ai/app`: 0.2.0
+- `@tokenring-ai/agent`: 0.2.0
+- `@tokenring-ai/chat`: 0.2.0
+- `@tokenring-ai/utility`: 0.2.0
+- `@tokenring-ai/scripting`: 0.2.0
 - `zod`: ^4.3.6
 
 ## Core Components/API
 
-### WebSearchProvider (Abstract Class)
+### WebSearchProvider (Interface)
 
-The abstract base class that defines the interface for all search provider implementations.
+The interface that defines the contract for all search provider implementations.
 
 **Location**: `pkg/websearch/WebSearchProvider.ts`
 
-**Abstract Methods:**
+**Required Methods:**
 
 ```typescript
-abstract searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>
-abstract searchNews(query: string, options?: WebSearchProviderOptions): Promise<NewsSearchResult>
-abstract fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>
+interface WebSearchProvider {
+  searchWeb(query: string, options?: WebSearchProviderOptions): Promise<WebSearchResult>
+  searchNews(query: string, options?: WebSearchProviderOptions): Promise<NewsSearchResult>
+  fetchPage(url: string, options?: WebPageOptions): Promise<WebPageResult>
+}
 ```
 
 **Result Type Definitions:**
 
-- `WebSearchResult`: General search results with knowledge graph, organic results, related searches, and people also ask sections
+- `WebSearchResult`: General search results with knowledge graph, organic results, related searches, and people also ask
+  sections
 - `NewsSearchResult`: News article results with titles, links, dates, sources, and snippets
 - `WebPageResult`: Web page content in markdown format with optional metadata
 - `DeepSearchResult`: Combined results from web search, news search, and page fetching
@@ -80,6 +86,7 @@ interface WebPageOptions {
   render?: boolean;        // Enable JavaScript rendering for dynamic content
   countryCode?: string;    // Country code for localized results
   timeout?: number;        // Request timeout in milliseconds
+  deviceType?: 'desktop' | 'mobile';
 }
 
 interface DeepSearchOptions extends WebSearchProviderOptions {
@@ -105,7 +112,7 @@ registerProvider(provider: WebSearchProvider, name: string): void
 getAvailableProviders(): string[]
 setActiveProvider(name: string, agent: Agent): void
 requireActiveProvider(agent: Agent): WebSearchProvider
-attach(agent: Agent): void
+attach(agent: Agent, creationContext: AgentCreationContext): void
 ```
 
 **Search Operations:**
@@ -121,34 +128,35 @@ deepSearch(query: string, options?: DeepSearchOptions, agent: Agent): Promise<De
 
 The package provides four interactive tools that agents can use:
 
-| Tool Name | Description |
-|-----------|-------------|
-| `websearch_searchWeb` | Search the web using the active web search provider |
-| `websearch_searchNews` | Search for news articles using the active web search provider |
-| `websearch_fetchPage` | Fetch the content of a web page using the active web search provider |
-| `websearch_deepSearch` | Perform a comprehensive deep search with content fetching |
+| Tool Name              | Description                                                          |
+|------------------------|----------------------------------------------------------------------|
+| `websearch_searchWeb`  | Search the web using the active web search provider                  |
+| `websearch_searchNews` | Search for news articles using the active web search provider        |
+| `websearch_fetchPage`  | Fetch the content of a web page using the active web search provider |
+| `websearch_deepSearch` | Perform a comprehensive deep search with content fetching            |
 
 ### Chat Commands
 
-The plugin provides comprehensive chat commands for interactive web search operations. All commands are prefixed with `/websearch`.
+The plugin provides comprehensive chat commands for interactive web search operations. All commands are prefixed with
+`/websearch`.
 
-| Command | Description |
-|---------|-------------|
-| `/websearch search <query>` | Perform a general web search |
-| `/websearch news <query>` | Search for news articles |
-| `/websearch fetch <url>` | Fetch and extract content from a specific web page |
-| `/websearch deep <query>` | Perform comprehensive search with content fetching |
-| `/websearch provider get` | Display the currently active web search provider |
-| `/websearch provider set <name>` | Set the active web search provider by name |
-| `/websearch provider select` | Interactively select the active web search provider |
-| `/websearch provider reset` | Reset the active web search provider to the initial configured value |
+| Command                          | Description                                                          |
+|----------------------------------|----------------------------------------------------------------------|
+| `/websearch search <query>`      | Perform a general web search                                         |
+| `/websearch news <query>`        | Search for news articles                                             |
+| `/websearch fetch <url>`         | Fetch and extract content from a specific web page                   |
+| `/websearch deep <query>`        | Perform comprehensive search with content fetching                   |
+| `/websearch provider get`        | Display the currently active web search provider                     |
+| `/websearch provider set <name>` | Set the active web search provider by name                           |
+| `/websearch provider select`     | Interactively select the active web search provider                  |
+| `/websearch provider reset`      | Reset the active web search provider to the initial configured value |
 
 ## Usage Examples
 
 ### Basic Plugin Registration
 
 ```typescript
-import { TokenRingApp } from '@tokenring-ai/app';
+import {TokenRingApp} from '@tokenring-ai/app';
 import websearch from '@tokenring-ai/websearch';
 
 const app = new TokenRingApp({
@@ -176,7 +184,7 @@ await app.start();
 ### Service Integration
 
 ```typescript
-import { WebSearchService } from '@tokenring-ai/websearch';
+import WebSearchService from '@tokenring-ai/websearch/WebSearchService';
 
 // Access the service from an agent
 const webSearchService = agent.requireServiceByType(WebSearchService);
@@ -230,16 +238,16 @@ const deep = await agent.callTool("websearch_deepSearch", {
 /websearch search typescript tutorial
 
 # Location-specific search
-/websearch search restaurants --location "New York,US" --country us
+/websearch search --location "New York" --country us restaurants
 
 # News search
-/websearch news cryptocurrency --num 10
+/websearch news --num 10 cryptocurrency
 
 # Fetch web page with JavaScript rendering
-/websearch fetch https://example.com --render
+/websearch fetch --render https://example.com
 
 # Deep search with multiple operations
-/websearch deep quantum computing --search 20 --news 5 --fetch 10 --language en --country uk
+/websearch deep --search 20 --news 5 --fetch 10 --language en --country uk quantum computing
 
 # Provider management
 /websearch provider get
@@ -273,6 +281,8 @@ const comprehensive = await deepSearch("machine learning breakthroughs", "15", "
 ### Deep Search with Custom Reranking
 
 ```typescript
+import WebSearchService from '@tokenring-ai/websearch/WebSearchService';
+
 const webSearchService = agent.requireServiceByType(WebSearchService);
 
 const results = await webSearchService.deepSearch('machine learning', {
@@ -296,14 +306,10 @@ console.log(`Fetched ${results.pages.length} pages`);
 ### Custom Provider Registration
 
 ```typescript
-import WebSearchProvider, {
-  WebSearchResult,
-  NewsSearchResult,
-  WebPageResult
-} from '@tokenring-ai/websearch';
-import WebSearchService from '@tokenring-ai/websearch';
+import type { WebSearchProvider, WebSearchResult, NewsSearchResult, WebPageResult } from '@tokenring-ai/websearch/WebSearchProvider';
+import WebSearchService from '@tokenring-ai/websearch/WebSearchService';
 
-class CustomSearchProvider extends WebSearchProvider {
+class CustomSearchProvider implements WebSearchProvider {
   async searchWeb(query: string, options?: any): Promise<WebSearchResult> {
     // Implement custom search logic
     // Return structured results matching WebSearchResult interface
@@ -330,7 +336,8 @@ app.waitForService(WebSearchService, (websearchService) => {
 
 ### Application Configuration
 
-The plugin requires configuration to enable provider implementations. Configuration is loaded using the `WebSearchConfigSchema`:
+The plugin requires configuration to enable provider implementations. Configuration is loaded using the
+`WebSearchConfigSchema`:
 
 ```typescript
 const config = {
@@ -358,9 +365,9 @@ const config = {
 export const WebSearchConfigSchema = z.object({
   providers: z.record(z.string(), z.any()),  // Provider configurations
   agentDefaults: z.object({
-    provider: z.string()  // Required default provider
-  })
-});
+    provider: z.string().optional()  // Optional default provider
+  }).default({})
+}).default({});
 ```
 
 ### Agent Configuration
@@ -388,7 +395,7 @@ export const WebSearchAgentConfigSchema = z.object({
 The package uses `WebSearchState` to manage the active provider per agent:
 
 ```typescript
-import { WebSearchState } from '@tokenring-ai/websearch';
+import { WebSearchState } from '@tokenring-ai/websearch/state/webSearchState';
 
 // Get current active provider
 const state = agent.getState(WebSearchState);
@@ -424,6 +431,8 @@ state.deserialize({ provider: 'scraperapi' });
 Agents can access the web search service directly through dependency injection:
 
 ```typescript
+import WebSearchService from '@tokenring-ai/websearch/WebSearchService';
+
 const webSearchService = agent.requireServiceByType(WebSearchService);
 const results = await webSearchService.searchWeb('latest AI research', { num: 10 }, agent);
 ```
@@ -435,7 +444,8 @@ The plugin automatically registers four global scripting functions when the scri
 - `searchWeb(query: string)`: Performs a web search and returns JSON results as string
 - `searchNews(query: string)`: Performs a news search and returns JSON results as string
 - `fetchPage(url: string)`: Fetches page markdown content as string
-- `deepSearch(query: string, searchCount?, newsCount?, fetchCount?)`: Performs comprehensive deep search and returns JSON results as string
+- `deepSearch(query: string, searchCount?, newsCount?, fetchCount?)`: Performs comprehensive deep search and returns
+  JSON results as string
 
 ### Provider Integration
 
@@ -443,44 +453,51 @@ This package is designed to work with concrete provider implementations:
 
 - **@tokenring-ai/serper**: Google Search and News via Serper.dev API
 - **@tokenring-ai/scraperapi**: Google SERP and News via ScraperAPI
-- **Custom Providers**: Extend `WebSearchProvider` abstract class
+- **Custom Providers**: Implement `WebSearchProvider` interface
 
 ## Best Practices
 
-1. **Provider Selection**: Configure a default provider in `agentDefaults`, but allow per-agent overrides for specialized tasks
+1. **Provider Selection**: Configure a default provider in `agentDefaults`, but allow per-agent overrides for
+   specialized tasks
 
 2. **Rate Limit Handling**: Implement proper timeout configurations and handle rate limit errors
-   - Set reasonable timeouts for API calls
-   - Implement retry logic with exponential backoff in provider implementations
+
+- Set reasonable timeouts for API calls
+- Implement retry logic with exponential backoff in provider implementations
 
 3. **Result Normalization**: While result structures are provider-dependent, implement normalization in consumer code
 
 4. **Security**: Handle API keys and credentials securely
-   - Use environment variables for sensitive data
-   - Never embed credentials in configuration files
+
+- Use environment variables for sensitive data
+- Never embed credentials in configuration files
 
 5. **Performance Optimization**:
-   - Use `deepSearch` with appropriate result counts
-   - Implement caching for frequently accessed content
-   - Consider parallel execution for independent operations
-   - Deep search already uses `Promise.all()` for web and news searches
+
+- Use `deepSearch` with appropriate result counts
+- Implement caching for frequently accessed content
+- Consider parallel execution for independent operations
+- Deep search already uses `Promise.all()` for web and news searches
 
 6. **Error Handling**:
-   - Validate all inputs before API calls
-   - Provide clear error messages for troubleshooting
-   - Include error context (status codes, hints) for API failures
-   - Handle `CommandFailedError` for command operations
+
+- Validate all inputs before API calls
+- Provide clear error messages for troubleshooting
+- Include error context (status codes, hints) for API failures
+- Handle errors appropriately for command operations
 
 7. **Content Respect**:
-   - Respect robots.txt and terms of service
-   - Implement proper header handling for requests
-   - Be mindful of volume limits and avoid excessive requests
+
+- Respect robots.txt and terms of service
+- Implement proper header handling for requests
+- Be mindful of volume limits and avoid excessive requests
 
 8. **Testing**:
-   - Test with multiple provider implementations to ensure consistency
-   - Mock API responses for testing error conditions
-   - Verify timeout and retry logic
-   - Test state persistence and restoration
+
+- Test with multiple provider implementations to ensure consistency
+- Mock API responses for testing error conditions
+- Verify timeout and retry logic
+- Test state persistence and restoration
 
 9. **Agent State Management**: Use provider selection to differentiate behavior in different agent contexts
 
@@ -507,7 +524,7 @@ Tests use vitest with node environment, following the patterns established in ot
 
 ### Development Checklist
 
-- [ ] Implement abstract methods in provider
+- [ ] Implement interface methods in provider
 - [ ] Validate all input parameters with Zod schemas
 - [ ] Handle API rate limits with appropriate timeouts
 - [ ] Implement proper error handling
@@ -519,12 +536,12 @@ Tests use vitest with node environment, following the patterns established in ot
 
 ### Package Structure
 
-```
+```text
 pkg/websearch/
-├── index.ts                 # Main exports (WebSearchService, WebSearchProvider, schemas)
+├── index.ts                 # Main exports (WebSearchService, schemas)
 ├── plugin.ts                # TokenRingPlugin registration
 ├── WebSearchService.ts      # Core service implementation
-├── WebSearchProvider.ts     # Abstract base class definition
+├── WebSearchProvider.ts     # Interface definition and types
 ├── schema.ts                # Zod schema definitions
 ├── tools.ts                 # Barrel export for all tools
 ├── commands.ts              # Chat command exports
@@ -551,12 +568,12 @@ pkg/websearch/
 ## Limitations
 
 - **Abstract Package**: No built-in search engine implementations
-  - Requires concrete provider implementations for actual functionality
-  - Result structures are provider-dependent; implement normalization in consumer code
+- Requires concrete provider implementations for actual functionality
+- Result structures are provider-dependent; implement normalization in consumer code
 
 - **Rate Limiting**: High-volume fetching may trigger API rate limits
-  - Configure appropriate timeouts and retry logic
-  - Respect provider constraints
+- Configure appropriate timeouts and retry logic
+- Respect provider constraints
 
 - **Content Type**: Binary/non-text content not supported in page fetch operations
 
