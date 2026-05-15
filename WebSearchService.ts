@@ -1,7 +1,7 @@
 import type { Agent } from "@tokenring-ai/agent";
 import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type { TokenRingService } from "@tokenring-ai/app/types";
-import deepMerge from "@tokenring-ai/utility/object/deepMerge";
+import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type z from "zod";
 import { WebSearchAgentConfigSchema, type WebSearchConfigSchema } from "./schema.ts";
@@ -29,7 +29,7 @@ export default class WebSearchService implements TokenRingService {
   constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {}
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
-    const config = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice("websearch", WebSearchAgentConfigSchema));
+    const config = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("websearch", WebSearchAgentConfigSchema));
     if (config.provider) {
       creationContext.items.push(`Web Search Provider: ${config.provider}`);
     } else {
