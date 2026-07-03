@@ -9,7 +9,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
   const webSearch = agent.requireServiceByType(WebSearchService);
   const available = webSearch.getAvailableProviders();
   if (available.length === 0) return "No web search providers are registered.";
-  if (available.length === 1) {
+  if (available.length === 1 && available[0]) {
     webSearch.setActiveProvider(available[0], agent);
     return `Only one provider configured, auto-selecting: ${available[0]}`;
   }
@@ -30,7 +30,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
       tree,
     },
   });
-  if (selection) {
+  if (selection?.[0]) {
     webSearch.setActiveProvider(selection[0], agent);
     return `Active provider set to: ${selection[0]}`;
   }

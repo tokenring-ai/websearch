@@ -34,7 +34,7 @@ export default class WebSearchService implements TokenRingService {
       creationContext.items.push(`Web Search Provider: ${config.provider}`);
     } else {
       const providers = this.providerRegistry.keysArray().sort();
-      if (providers.length === 0) {
+      if (!providers[0]) {
         creationContext.items.push("Web Search Provider: (none)");
       } else {
         creationContext.items.push(`Web Search Provider: ${providers[0]}`);
