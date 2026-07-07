@@ -1,6 +1,7 @@
 import type { Agent } from "@tokenring-ai/agent";
 import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import { ConfigurationError } from "@tokenring-ai/app/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type z from "zod";
@@ -46,7 +47,7 @@ export default class WebSearchService implements TokenRingService {
 
   requireActiveProvider(agent: Agent): WebSearchProvider {
     const providerName = agent.getState(WebSearchState).provider;
-    if (!providerName) throw new Error("No web search provider has been enabled.");
+    if (!providerName) throw new ConfigurationError(this.name, "No web search provider has been enabled.");
     return this.providerRegistry.require(providerName);
   }
 
@@ -87,12 +88,10 @@ export default class WebSearchService implements TokenRingService {
 
     const toFetch = results.slice(0, fetchCount);
     const pages = await Promise.all(
-      toFetch.map(async (result: any) => {
-        const url = result.url || result.link;
-        if (!url) return null;
+      toFetch.map(async result => {
         try {
-          const page = await this.fetchPage(url, { countryCode: options?.countryCode }, agent);
-          return { url, ...page };
+          const page = await this.fetchPage(result.link, { countryCode: options?.countryCode }, agent);
+          return { url: result.link, ...page };
         } catch {
           return null;
         }

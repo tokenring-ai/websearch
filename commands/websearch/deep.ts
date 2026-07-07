@@ -57,7 +57,7 @@ async function execute({ remainder, args, agent }: AgentCommandInputType<typeof 
 
   const resultsList = [
     result.results.length > 0
-      ? `### Web Results (${result.results.length})\n${result.results.map((r, i) => `${i + 1}. ${r.title}\n   ${r.url}\n   ${r.snippet}`).join("\n\n")}`
+      ? `### Web Results (${result.results.length})\n${result.results.map((r, i) => `${i + 1}. ${r.title}\n   ${r.link}\n   ${r.snippet}`).join("\n\n")}`
       : "",
     result.news.length > 0
       ? `### News Results (${result.news.length})\n${result.news.map((n, i) => `${i + 1}. ${n.title}\n   ${n.link}\n   ${n.snippet}`).join("\n\n")}`

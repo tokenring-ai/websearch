@@ -82,11 +82,11 @@ export interface DeepSearchOptions extends WebSearchProviderOptions {
   searchCount?: number | undefined;
   newsCount?: number | undefined;
   fetchCount?: number | undefined;
-  rerank?: (results: any[]) => Promise<any[]>;
+  rerank?: <T>(results: T[]) => Promise<T[]>;
 }
 
 export interface DeepSearchResult {
-  results: any[];
+  results: OrganicResult[];
   news: NewsItem[];
   pages: Array<{
     url: string;
