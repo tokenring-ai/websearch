@@ -1,4 +1,4 @@
-import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand, TokenRingAgentCommandResult } from "@tokenring-ai/agent/types";
 import WebSearchService from "../../WebSearchService.ts";
 
 const inputSchema = {
@@ -32,7 +32,7 @@ const inputSchema = {
   },
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({ remainder, args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ remainder, args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<TokenRingAgentCommandResult> {
   const searchOptions = {
     searchCount: args.search,
     newsCount: args.news,
@@ -69,14 +69,19 @@ async function execute({ remainder, args, agent }: AgentCommandInputType<typeof 
     .filter(Boolean)
     .join("\n\n");
 
-  agent.artifactOutput({
-    name: `Deep search for ${remainder}`,
-    encoding: "text",
-    mimeType: "text/markdown",
-    body: `# Deep Search: ${remainder}\n\n## Search Options\n${optionsList || "No specific options provided"}\n\n## Results\n${resultsList || "No results found"}`,
-  });
-
-  return `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`;
+  return {
+    message: `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`,
+    attachments: [
+      {
+        type: "attachment",
+        timestamp: Date.now(),
+        name: `deep_research_${remainder}.md`,
+        encoding: "text",
+        mimeType: "text/markdown",
+        body: `# Deep Search: ${remainder}\n\n## Search Options\n${optionsList || "No specific options provided"}\n\n## Results\n${resultsList || "No results found"}`,
+      },
+    ],
+  };
 }
 
 export default {
