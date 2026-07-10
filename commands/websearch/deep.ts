@@ -73,8 +73,6 @@ async function execute({ remainder, args, agent }: AgentCommandInputType<typeof 
     message: `Deep search: ${result.results.length} web results, ${result.news.length} news results, ${result.pages.length} pages fetched`,
     attachments: [
       {
-        type: "attachment",
-        timestamp: Date.now(),
         name: `deep_research_${remainder}.md`,
         encoding: "text",
         mimeType: "text/markdown",
