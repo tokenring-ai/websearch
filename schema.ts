@@ -10,8 +10,10 @@ export const WebSearchConfigSchema = z
   .object({
     agentDefaults: z
       .object({
-        provider: z.string().exactOptional(),
+        provider: z.string().exactOptional().meta({ description: "Search provider new agents use by default (e.g. serper)" }),
       })
-      .prefault({}),
+      .prefault({})
+      .meta({ label: "Agent Defaults" }),
   })
-  .prefault({});
+  .prefault({})
+  .meta({ label: "Web Search", description: "Web search access for agents" });
