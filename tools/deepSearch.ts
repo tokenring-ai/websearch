@@ -25,7 +25,10 @@ async function execute(
     },
     agent,
   );
-  return JSON.stringify(data);
+  return {
+    message: `**Web Search** Deep searched "${query}"`,
+    result: JSON.stringify(data),
+  };
 }
 
 const description = "Perform a deep search: search the web, then fetch and return full page content for top results";

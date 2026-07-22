@@ -18,7 +18,10 @@ async function execute({ url, render, countryCode }: z.output<typeof inputSchema
     },
     agent,
   );
-  return result.markdown;
+  return {
+    message: `**Web Search** Fetched ${url}`,
+    result: result.markdown,
+  };
 }
 
 const description = "Fetch a web page using the active web search provider";

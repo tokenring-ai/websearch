@@ -21,7 +21,10 @@ async function execute({ query, countryCode, language, location, num, page }: z.
     },
     agent,
   );
-  return JSON.stringify(data);
+  return {
+    message: `**Web Search** Search for news on "${query}"`,
+    result: JSON.stringify(data),
+  };
 }
 
 const description = "Search news using the active web search provider";

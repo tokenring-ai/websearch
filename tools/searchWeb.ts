@@ -9,7 +9,6 @@ const displayName = "Websearch/searchWeb";
 async function execute({ query, countryCode, language, location, num, page }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const webSearch = agent.requireServiceByType(WebSearchService);
 
-  agent.infoMessage(`[${name}] Searching: ${query}`);
   const data = await webSearch.searchWeb(
     query,
     {
@@ -21,7 +20,10 @@ async function execute({ query, countryCode, language, location, num, page }: z.
     },
     agent,
   );
-  return JSON.stringify(data);
+  return {
+    message: `**Web Search** Searched for "${query}"`,
+    result: JSON.stringify(data),
+  };
 }
 
 const description = "Search the web using the active web search provider";
