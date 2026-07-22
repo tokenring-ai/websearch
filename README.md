@@ -520,7 +520,7 @@ bun build                   # Verify build compiles without errors
 
 ### Test Structure
 
-Tests use vitest with node environment, following the patterns established in other packages.
+Tests use bun test with node environment, following the patterns established in other packages.
 
 ### Development Checklist
 
