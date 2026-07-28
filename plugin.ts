@@ -19,8 +19,8 @@ export default {
   displayName: "Web Search",
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app, config) {
-    app.addServices(new WebSearchService(config.websearch));
+  install(app) {
+    app.addServices(new WebSearchService());
     app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("searchWeb", {
         type: "native",
@@ -69,6 +69,8 @@ export default {
     app.waitForService(ChatService, chatService => chatService.addTools(...tools));
     app.waitForService(AgentCommandService, agentCommandService => agentCommandService.addAgentCommands(agentCommands));
   },
-
+  reconfigure(app, config) {
+    app.requireService(WebSearchService).reconfigure(config.websearch);
+  },
   configSchema: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;

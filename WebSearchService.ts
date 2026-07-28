@@ -5,7 +5,7 @@ import { ConfigurationError } from "@tokenring-ai/app/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type z from "zod";
-import { WebSearchAgentConfigSchema, type WebSearchConfigSchema } from "./schema.ts";
+import { WebSearchAgentConfigSchema, WebSearchConfigSchema } from "./schema.ts";
 import { WebSearchState } from "./state/webSearchState.ts";
 import type {
   DeepSearchOptions,
@@ -18,6 +18,8 @@ import type {
   WebSearchResult,
 } from "./WebSearchProvider.ts";
 
+export type ParsedWebSearchConfig = z.output<typeof WebSearchConfigSchema>;
+
 export default class WebSearchService implements TokenRingService {
   readonly name = "WebSearchService";
   description = "Service for Web Search";
@@ -25,9 +27,18 @@ export default class WebSearchService implements TokenRingService {
   private providerRegistry = new KeyedRegistry<WebSearchProvider>();
 
   registerProvider = this.providerRegistry.set;
+  unregisterProvider = this.providerRegistry.unregister;
   getAvailableProviders = this.providerRegistry.keysArray;
 
-  constructor(readonly options: z.output<typeof WebSearchConfigSchema>) {}
+  private options: ParsedWebSearchConfig = WebSearchConfigSchema.parse({});
+
+  constructor(options?: ParsedWebSearchConfig) {
+    if (options) this.options = options;
+  }
+
+  reconfigure(options: ParsedWebSearchConfig): void {
+    this.options = options;
+  }
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
     const config = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("websearch", WebSearchAgentConfigSchema));
