@@ -15,9 +15,9 @@ const inputSchema = {
   positionals: [{ name: "url", description: "URL to fetch", required: true }],
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({ positionals, args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const result = await agent.requireServiceByType(WebSearchService).fetchPage(
-    positionals.url,
+async function execute({ args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const result = await agent.requireService(WebSearchService).fetchPage(
+    args.url,
     {
       render: args.render,
       countryCode: args.country,

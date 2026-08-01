@@ -22,7 +22,7 @@ const inputSchema = {
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({ remainder, args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const result = await agent.requireServiceByType(WebSearchService).searchWeb(
+  const result = await agent.requireService(WebSearchService).searchWeb(
     remainder,
     {
       countryCode: args.country,

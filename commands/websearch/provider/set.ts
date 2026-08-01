@@ -6,8 +6,8 @@ const inputSchema = {
   positionals: [{ name: "providerName", description: "Provider name", required: true }],
 } as const satisfies AgentCommandInputSchema;
 
-function execute({ positionals: { providerName }, agent }: AgentCommandInputType<typeof inputSchema>): string {
-  const webSearch = agent.requireServiceByType(WebSearchService);
+function execute({ args: { providerName }, agent }: AgentCommandInputType<typeof inputSchema>): string {
+  const webSearch = agent.requireService(WebSearchService);
   const available = webSearch.getAvailableProviders();
   if (available.includes(providerName)) {
     webSearch.setActiveProvider(providerName, agent);

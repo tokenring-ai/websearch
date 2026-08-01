@@ -7,7 +7,7 @@ const name = "websearch_searchNews";
 const displayName = "Websearch/searchNews";
 
 async function execute({ query, countryCode, language, location, num, page }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
-  const webSearch = agent.requireServiceByType(WebSearchService);
+  const webSearch = agent.requireService(WebSearchService);
 
   agent.infoMessage(`[${name}] Searching news: ${query}`);
   const data = await webSearch.searchNews(

@@ -7,7 +7,7 @@ const name = "websearch_fetchPage";
 const displayName = "Websearch/fetchPage";
 
 async function execute({ url, render, countryCode }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
-  const webSearch = agent.requireServiceByType(WebSearchService);
+  const webSearch = agent.requireService(WebSearchService);
 
   agent.infoMessage(`[${name}] Fetching: ${url}`);
   const result = await webSearch.fetchPage(

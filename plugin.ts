@@ -20,13 +20,13 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app) {
-    app.addServices(new WebSearchService());
+    app.addService(new WebSearchService());
     app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("searchWeb", {
         type: "native",
         params: ["query"],
         async execute(this: ScriptingThis, query: string): Promise<string> {
-          const result = await this.agent.requireServiceByType(WebSearchService).searchWeb(query, undefined, this.agent);
+          const result = await this.agent.requireService(WebSearchService).searchWeb(query, undefined, this.agent);
           return JSON.stringify(result);
         },
       });
@@ -35,7 +35,7 @@ export default {
         type: "native",
         params: ["query"],
         async execute(this: ScriptingThis, query: string): Promise<string> {
-          const result = await this.agent.requireServiceByType(WebSearchService).searchNews(query, undefined, this.agent);
+          const result = await this.agent.requireService(WebSearchService).searchNews(query, undefined, this.agent);
           return JSON.stringify(result);
         },
       });
@@ -44,7 +44,7 @@ export default {
         type: "native",
         params: ["url"],
         async execute(this: ScriptingThis, url: string): Promise<string> {
-          const result = await this.agent.requireServiceByType(WebSearchService).fetchPage(url, undefined, this.agent);
+          const result = await this.agent.requireService(WebSearchService).fetchPage(url, undefined, this.agent);
           return result.markdown;
         },
       });
@@ -53,7 +53,7 @@ export default {
         type: "native",
         params: ["query", "searchCount", "newsCount", "fetchCount"],
         async execute(this: ScriptingThis, query: string, searchCount?: string, newsCount?: string, fetchCount?: string): Promise<string> {
-          const result = await this.agent.requireServiceByType(WebSearchService).deepSearch(
+          const result = await this.agent.requireService(WebSearchService).deepSearch(
             query,
             {
               searchCount: searchCount ? parseInt(searchCount, 10) : undefined,
@@ -66,7 +66,7 @@ export default {
         },
       });
     });
-    app.waitForService(ChatService, chatService => chatService.addTools(...tools));
+    app.waitForService(ChatService, chatService => chatService.addTools(tools));
     app.waitForService(AgentCommandService, agentCommandService => agentCommandService.addAgentCommands(agentCommands));
   },
   reconfigure(app, config) {

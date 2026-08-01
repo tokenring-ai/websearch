@@ -6,7 +6,7 @@ import WebSearchService from "../../../WebSearchService.ts";
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const webSearch = agent.requireServiceByType(WebSearchService);
+  const webSearch = agent.requireService(WebSearchService);
   const available = webSearch.getAvailableProviders();
   if (available.length === 0) return "No web search providers are registered.";
   if (available.length === 1 && available[0]) {

@@ -42,7 +42,7 @@ async function execute({ remainder, args, agent }: AgentCommandInputType<typeof 
     location: args.location,
   };
 
-  const result = await agent.requireServiceByType(WebSearchService).deepSearch(remainder, searchOptions, agent);
+  const result = await agent.requireService(WebSearchService).deepSearch(remainder, searchOptions, agent);
 
   const optionsList = [
     searchOptions.searchCount ? `**Search Count:** ${searchOptions.searchCount}` : "",

@@ -10,7 +10,7 @@ async function execute(
   { query, searchCount, newsCount, fetchCount, countryCode, language, location }: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<TokenRingToolResult> {
-  const webSearch = agent.requireServiceByType(WebSearchService);
+  const webSearch = agent.requireService(WebSearchService);
 
   agent.infoMessage(`[${name}] Deep searching: ${query} (search: ${searchCount ?? 10}, news: ${newsCount ?? 0}, fetch: ${fetchCount ?? 5})`);
   const data = await webSearch.deepSearch(
