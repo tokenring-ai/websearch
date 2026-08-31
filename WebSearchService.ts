@@ -103,7 +103,8 @@ export default class WebSearchService implements TokenRingService {
         try {
           const page = await this.fetchPage(result.link, { countryCode: options?.countryCode }, agent);
           return { url: result.link, ...page };
-        } catch {
+        } catch (error) {
+          agent.warningMessage(`[WebSearchService] Failed to fetch page ${result.link}:`, error);
           return null;
         }
       }),

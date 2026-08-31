@@ -20,7 +20,7 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app) {
-    app.addService(new WebSearchService());
+    app.addService(WebSearchService, new WebSearchService());
     app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("searchWeb", {
         type: "native",
@@ -53,12 +53,15 @@ export default {
         type: "native",
         params: ["query", "searchCount", "newsCount", "fetchCount"],
         async execute(this: ScriptingThis, query: string, searchCount?: string, newsCount?: string, fetchCount?: string): Promise<string> {
+          const parsedSearchCount = searchCount ? Number.parseInt(searchCount, 10) : undefined;
+          const parsedNewsCount = newsCount ? Number.parseInt(newsCount, 10) : undefined;
+          const parsedFetchCount = fetchCount ? Number.parseInt(fetchCount, 10) : undefined;
           const result = await this.agent.requireService(WebSearchService).deepSearch(
             query,
             {
-              searchCount: searchCount ? parseInt(searchCount, 10) : undefined,
-              newsCount: newsCount ? parseInt(newsCount, 10) : undefined,
-              fetchCount: fetchCount ? parseInt(fetchCount, 10) : undefined,
+              searchCount: Number.isFinite(parsedSearchCount) ? parsedSearchCount : undefined,
+              newsCount: Number.isFinite(parsedNewsCount) ? parsedNewsCount : undefined,
+              fetchCount: Number.isFinite(parsedFetchCount) ? parsedFetchCount : undefined,
             },
             this.agent,
           );
